@@ -1,0 +1,15 @@
+{
+  "name": "quickstack-sdk",
+  "module": "src/index.ts",
+  "type": "module",
+  "scripts": {
+    "generate": "bunx swagger-typescript-api generate -p quickstack.openapi.json -o src/generated -n quickstack.ts",
+    "start": "bun src/index.ts"
+  },
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  }
+}

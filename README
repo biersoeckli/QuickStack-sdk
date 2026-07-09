@@ -1,0 +1,111 @@
+So nutzt du generierte API:
+
+```ts
+import { Api } from '@/sdk/generated/quickstack';
+
+const api = new Api<{ token: string }>({
+  baseUrl: 'http://localhost:3000',
+  securityWorker: (securityData) => {
+    if (!securityData?.token) return {};
+
+    return {
+      headers: {
+        Authorization: `Bearer ${securityData.token}`,
+      },
+    };
+  },
+});
+
+api.setSecurityData({ token: 'DEIN_BEARER_TOKEN' });
+```
+
+Dann Calls:
+
+```ts
+const projectsRes = await api.api.listProjects();
+console.log(projectsRes.data);
+
+const appRes = await api.api.getApp('app-id');
+console.log(appRes.data);
+
+const appsRes = await api.api.listApps({ projectId: 'project-id' });
+console.log(appsRes.data);
+```
+
+Wichtig:
+- `baseUrl` nur Host. Nicht `/api/v1`, weil Pfade in SDK schon `/api/v1/...` enthalten.
+- Ergebnis liegt in `.data`
+- Fehler werfen Exception via `throw data`
+
+Create/Update Beispiel:
+
+```ts
+const created = await api.api.saveProject({
+  name: 'My Project',
+  projectType: 'APP',
+});
+
+console.log(created.data.id);
+```
+
+Mit Try/Catch:
+
+```ts
+try {
+  const res = await api.api.deleteApp('app-id');
+  console.log(res.data);
+} catch (err) {
+  console.error(err);
+}
+```
+
+Wenn du kein `securityWorker` willst:
+
+```ts
+const api = new Api({
+  baseUrl: 'http://localhost:3000',
+});
+
+const res = await api.api.listProjects({
+  headers: {
+    Authorization: 'Bearer DEIN_TOKEN',
+  },
+});
+```
+
+Node-Script komplett:
+
+```ts
+import { Api } from './src/sdk/generated/quickstack';
+
+async function main() {
+  const api = new Api<{ token: string }>({
+    baseUrl: 'http://localhost:3000',
+    securityWorker: (securityData) => ({
+      headers: securityData?.token
+        ? { Authorization: `Bearer ${securityData.token}` }
+        : {},
+    }),
+  });
+
+  api.setSecurityData({ token: process.env.QUICKSTACK_TOKEN! });
+
+  const projects = await api.api.listProjects();
+  console.log(projects.data);
+}
+
+main().catch(console.error);
+```
+
+Warum `api.api.listProjects()`?
+- erste `api` = Instanz
+- zweite `api` = Gruppe aus generierter Klasse
+
+Wenn du willst, baue ich dir jetzt kleine Wrapper-Datei wie `src/sdk/quickstack-client.ts`, damit du nur noch `quickstack.listProjects()` schreibst.
+
+
+---
+
+
+Generieren:
+npx swagger-typescript-api generate -p quickstack.openapi.json -o src/generated -n quickstack.ts
