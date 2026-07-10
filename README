@@ -1,7 +1,8 @@
 So nutzt du generierte API:
 
 ```ts
-import { Api } from '@/sdk/generated/quickstack';
+import { Api } from '@/sdk/generated/Api';
+import type { ListProjectsData } from '@/sdk/generated/data-contracts';
 
 const api = new Api<{ token: string }>({
   baseUrl: 'http://localhost:3000',
@@ -22,13 +23,14 @@ api.setSecurityData({ token: 'DEIN_BEARER_TOKEN' });
 Dann Calls:
 
 ```ts
-const projectsRes = await api.api.listProjects();
-console.log(projectsRes.data);
+const projectsRes = await api.listProjects();
+const projects: ListProjectsData = projectsRes.data;
+console.log(projects);
 
-const appRes = await api.api.getApp('app-id');
+const appRes = await api.getApp({ id: 'app-id' });
 console.log(appRes.data);
 
-const appsRes = await api.api.listApps({ projectId: 'project-id' });
+const appsRes = await api.listApps({ projectId: 'project-id' });
 console.log(appsRes.data);
 ```
 
@@ -40,7 +42,7 @@ Wichtig:
 Create/Update Beispiel:
 
 ```ts
-const created = await api.api.saveProject({
+const created = await api.saveProject({
   name: 'My Project',
   projectType: 'APP',
 });
@@ -52,7 +54,7 @@ Mit Try/Catch:
 
 ```ts
 try {
-  const res = await api.api.deleteApp('app-id');
+  const res = await api.deleteApp({ id: 'app-id' });
   console.log(res.data);
 } catch (err) {
   console.error(err);
@@ -66,7 +68,7 @@ const api = new Api({
   baseUrl: 'http://localhost:3000',
 });
 
-const res = await api.api.listProjects({
+const res = await api.listProjects({
   headers: {
     Authorization: 'Bearer DEIN_TOKEN',
   },
@@ -76,7 +78,7 @@ const res = await api.api.listProjects({
 Node-Script komplett:
 
 ```ts
-import { Api } from './src/sdk/generated/quickstack';
+import { Api } from './src/generated/Api';
 
 async function main() {
   const api = new Api<{ token: string }>({
@@ -90,16 +92,28 @@ async function main() {
 
   api.setSecurityData({ token: process.env.QUICKSTACK_TOKEN! });
 
-  const projects = await api.api.listProjects();
+  const projects = await api.listProjects();
   console.log(projects.data);
 }
 
 main().catch(console.error);
 ```
 
-Warum `api.api.listProjects()`?
-- erste `api` = Instanz
-- zweite `api` = Gruppe aus generierter Klasse
+Warum `api.listProjects()`?
+- Methoden liegen direkt auf der generierten `Api`-Klasse.
+
+Typen aus OpenAPI nutzen:
+```ts
+import type { SaveProjectPayload, SaveProjectData } from './src/generated/data-contracts';
+
+const payload: SaveProjectPayload = {
+  name: 'My Project',
+  projectType: 'APP',
+};
+
+const created = await api.saveProject(payload);
+const project: SaveProjectData = created.data;
+```
 
 Wenn du willst, baue ich dir jetzt kleine Wrapper-Datei wie `src/sdk/quickstack-client.ts`, damit du nur noch `quickstack.listProjects()` schreibst.
 
@@ -108,4 +122,4 @@ Wenn du willst, baue ich dir jetzt kleine Wrapper-Datei wie `src/sdk/quickstack-
 
 
 Generieren:
-npx swagger-typescript-api generate -p quickstack.openapi.json -o src/generated -n quickstack.ts
+npx swagger-typescript-api generate -p quickstack.openapi.json -o src/generated -n quickstack.ts --modular --extract-request-body --extract-request-params --extract-response-body --extract-response-error

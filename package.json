@@ -3,7 +3,7 @@
   "module": "src/index.ts",
   "type": "module",
   "scripts": {
-    "generate": "bunx swagger-typescript-api generate -p quickstack.openapi.json -o src/generated -n quickstack.ts",
+    "generate": "rm -f src/generated/Api.ts src/generated/data-contracts.ts src/generated/http-client.ts && bunx swagger-typescript-api generate -p quickstack.openapi.json -o src/generated -n quickstack.ts --modular --extract-request-body --extract-request-params --extract-response-body --extract-response-error",
     "start": "bun src/index.ts"
   },
   "devDependencies": {
