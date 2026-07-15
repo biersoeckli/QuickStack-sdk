@@ -41,6 +41,10 @@
     "README.md",
     "LICENSE"
   ],
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org"
+  },
   "scripts": {
     "generate": "rm -f src/generated/Api.ts src/generated/data-contracts.ts src/generated/http-client.ts && bunx swagger-typescript-api generate -p quickstack.openapi.json -o src/generated -n quickstack.ts --modular --extract-request-body --extract-request-params --extract-response-body --extract-response-error",
     "clean": "rm -rf dist",
