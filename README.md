@@ -1,6 +1,6 @@
-# @quickstack/sdk
+# @quickstackdev/sdk
 
-Type-safe JavaScript/TypeScript SDK for the QuickStack API.
+Official SDK for the QuickStack API: https://quickstack.dev
 
 This SDK provides:
 
@@ -10,13 +10,13 @@ This SDK provides:
 ## Installation
 
 ```bash
-npm install @quickstack/sdk
+npm install @quickstackdev/sdk
 ```
 
 ## Quick Start
 
 ```ts
-import { QuickStackClient } from "@quickstack/sdk";
+import { QuickStackClient } from "@quickstackdev/sdk";
 
 /**
  * Either provide the base URL and token directly, or set the environment variables:
@@ -34,7 +34,7 @@ console.log(agents);
 You can pass credentials directly:
 
 ```ts
-import { QuickStackClient } from "@quickstack/sdk";
+import { QuickStackClient } from "@quickstackdev/sdk";
 
 const client = QuickStackClient.create("https://your-quickstack-host", "your-api-token");
 ```
@@ -58,7 +58,7 @@ const client = QuickStackClient.create();
 ### Create App
 
 ```ts
-import { QuickStackClient } from "@quickstack/sdk";
+import { QuickStackClient } from "@quickstackdev/sdk";
 
 const client = QuickStackClient.create();
 
@@ -153,7 +153,7 @@ console.log("App deleted");
 ### Create Agent
 
 ```ts
-import { QuickStackClient } from "@quickstack/sdk";
+import { QuickStackClient } from "@quickstackdev/sdk";
 
 const client = QuickStackClient.create();
 
@@ -235,7 +235,7 @@ This section shows the full sandbox lifecycle: create, run actions, and delete.
 ### 1) Create Sandbox
 
 ```ts
-import { QuickStackClient } from "@quickstack/sdk";
+import { QuickStackClient } from "@quickstackdev/sdk";
 
 const client = QuickStackClient.create();
 
@@ -306,4 +306,4 @@ npm pack --dry-run
 ## Notes
 
 - The package is ESM-only.
-- Public entrypoint is the package root import (`@quickstack/sdk`).
+- Public entrypoint is the package root import (`@quickstackdev/sdk`).

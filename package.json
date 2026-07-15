@@ -1,5 +1,5 @@
 {
-  "name": "@quickstack/sdk",
+  "name": "@quickstackdev/sdk",
   "version": "0.0.1",
   "description": "Official JavaScript/TypeScript SDK for the QuickStack API.",
   "type": "module",
