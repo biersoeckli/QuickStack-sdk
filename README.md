@@ -2,6 +2,11 @@
 
 Official SDK for the QuickStack API: https://quickstack.dev
 
+## What is QuickStack?
+
+QuickStack is a platform for running and managing apps, services, and agents.
+With this SDK, JavaScript and TypeScript applications can communicate with the API of a QuickStack instance, for example to manage apps, agents, sandbox instances, and related resources programmatically.
+
 This SDK provides:
 
 - Simple interaction with the QuickStack API endpoints for managing apps and agents
@@ -12,6 +17,10 @@ This SDK provides:
 ```bash
 npm install @quickstackdev/sdk
 ```
+
+## License
+
+This package is licensed under the GNU General Public License v3.0. See [LICENSE](./LICENSE) for details.
 
 ## Quick Start
 
