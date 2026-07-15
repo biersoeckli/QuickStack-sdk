@@ -37,7 +37,7 @@ export class QuickStackClient {
     private constructor(baseUrl: string, token: string) {
 
         if (!baseUrl || !token) {
-            throw new Error('API_BASE_URL and API_TOKEN must be set in the environment variables.');
+            throw new Error('Missing API credentials. Provide baseUrl/token or set QUICKSTACK_BASE_URL and QUICKSTACK_API_TOKEN.');
         }
 
         this.openApiClient = new Api<SecurityData>({
@@ -58,16 +58,16 @@ export class QuickStackClient {
 
     /**
      * Creates a new instance of `QuickStackClient` with the provided base URL and token.
-     * If not provided, it will use the `API_BASE_URL` and `API_TOKEN` environment variables.
-     * @param baseUrl Base URL for the QuickStack API. Defaults to `process.env.API_BASE_URL`.
+     * If not provided, it will use the `QUICKSTACK_BASE_URL` and `API_TOKEN` environment variables.
+     * @param baseUrl Base URL for the QuickStack API. Defaults to `process.env.QUICKSTACK_API_TOKEN`.
      * @param token Authentication token for the QuickStack API. Defaults to `process.env.API_TOKEN`.
      * @returns An instance of `QuickStackApiInstance` with all API methods and additional utility methods.
      * @throws Error if the base URL or token is not provided and not set in the environment variables.
      */
     static create(baseUrl?: string, token?: string): QuickStackApiInstance {
 
-        baseUrl = baseUrl || process.env.API_BASE_URL!;
-        token = token || process.env.API_TOKEN!;
+        baseUrl = baseUrl || process.env.QUICKSTACK_BASE_URL!;
+        token = token || process.env.QUICKSTACK_API_TOKEN!;
 
         const apiInstance = new QuickStackClient(baseUrl, token);
         const openapiClient = apiInstance.openApiClient;
