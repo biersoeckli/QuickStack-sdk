@@ -241,6 +241,9 @@ console.log("Agent deleted");
 
 This section shows the full sandbox lifecycle: create, run actions, and delete.
 
+For convenience operations that return an `AgentSandboxInstance`, use `client.sandboxInstances`.
+If you want the raw API endpoint response object directly, call `client.createAgentSandbox(...)`.
+
 ### 1) Create Sandbox
 
 ```ts
@@ -248,7 +251,7 @@ import { QuickStackClient } from "@quickstackdev/sdk";
 
 const client = QuickStackClient.create();
 
-const sandbox = await client.createAgentSandbox("agent-id", {
+const sandbox = await client.sandboxInstances.create("agent-id", {
   timeoutMs: 60_000,
   idleTimeoutMinutes: 15,
   env: {
@@ -258,6 +261,29 @@ const sandbox = await client.createAgentSandbox("agent-id", {
 });
 
 console.log("Sandbox claim:", sandbox.currentSandbox.claimName);
+```
+
+### Optional: Call Endpoint Directly
+
+```ts
+const created = await client.createAgentSandbox(
+  { agentId: "agent-id", timeoutMs: 60_000 },
+  {
+    idleTimeoutMinutes: 15,
+    env: {
+      NODE_ENV: "development",
+    },
+  },
+);
+
+console.log("Created claim:", created.claimName);
+```
+
+### Optional: Attach Existing Sandbox
+
+```ts
+const attached = await client.sandboxInstances.attach("agent-id", "claim-name");
+console.log("Attached sandbox status:", attached.currentSandbox.status);
 ```
 
 ### 2) Execute Actions in Sandbox

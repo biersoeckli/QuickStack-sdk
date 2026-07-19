@@ -86,4 +86,106 @@ describe("QuickStackClient.create", () => {
             globalThis.fetch = originalFetch;
         }
     });
+
+    test("sandboxInstances.create uses internal OpenAPI endpoint without recursion", async () => {
+        const client = QuickStackClient.create("https://api.quickstack.dev", "token-sandbox");
+
+        const sandboxData = {
+            agentId: "agent-123",
+            claimName: "claim-abc",
+            sandboxName: "sandbox-main",
+            podName: "pod-1",
+            namespace: "ns-1",
+            status: "DEPLOYED",
+            customTag: null,
+            createdAt: "2026-07-19T00:00:00.000Z",
+        };
+
+        let receivedParams: unknown;
+        let receivedPayload: unknown;
+
+        (client.openApiClient as any).createAgentSandbox = async (params: unknown, payload: unknown) => {
+            receivedParams = params;
+            receivedPayload = payload;
+            return { data: sandboxData };
+        };
+
+        const sandbox = await client.sandboxInstances.create("agent-123", {
+            idleTimeoutMinutes: 15,
+            env: { NODE_ENV: "test" },
+        });
+
+        expect(receivedParams).toEqual({
+            agentId: "agent-123",
+            timeoutMs: 60000,
+        });
+        expect(receivedPayload).toEqual({
+            idleTimeoutMinutes: 15,
+            env: { NODE_ENV: "test" },
+        });
+        expect(sandbox.currentSandbox).toEqual(sandboxData);
+    });
+
+    test("createAgentSandbox endpoint remains directly callable", async () => {
+        const originalFetch = globalThis.fetch;
+
+        const sandboxData = {
+            agentId: "agent-endpoint",
+            claimName: "claim-endpoint",
+            sandboxName: "sandbox-endpoint",
+            podName: "pod-endpoint",
+            namespace: "ns-endpoint",
+            status: "DEPLOYED",
+            customTag: null,
+            createdAt: "2026-07-19T00:00:00.000Z",
+        };
+
+        globalThis.fetch = (async (_input: RequestInfo | URL, _init?: RequestInit) => {
+            return new Response(JSON.stringify(sandboxData), {
+                status: 200,
+                headers: {
+                    "content-type": "application/json",
+                },
+            });
+        }) as typeof fetch;
+
+        try {
+            const client = QuickStackClient.create("https://api.quickstack.dev", "token-endpoint");
+            const created = await client.createAgentSandbox(
+                { agentId: "agent-endpoint", timeoutMs: 60000 },
+                { idleTimeoutMinutes: 15, env: { NODE_ENV: "test" } },
+            );
+
+            expect(created).toEqual(sandboxData);
+        } finally {
+            globalThis.fetch = originalFetch;
+        }
+    });
+
+    test("sandboxInstances.attach loads an existing sandbox", async () => {
+        const client = QuickStackClient.create("https://api.quickstack.dev", "token-attach");
+
+        const sandboxData = {
+            agentId: "agent-attach",
+            claimName: "claim-attach",
+            sandboxName: "sandbox-attach",
+            podName: "pod-attach",
+            namespace: "ns-attach",
+            status: "DEPLOYED",
+            customTag: null,
+            createdAt: "2026-07-19T00:00:00.000Z",
+        };
+
+        let receivedParams: unknown;
+
+        (client.openApiClient as any).getAgentSandbox = async (params: unknown) => {
+            receivedParams = params;
+            return { data: sandboxData };
+        };
+
+        const sandbox = await client.sandboxInstances.attach("agent-attach", "claim-attach");
+
+        expect(receivedParams).toEqual({ agentId: "agent-attach", claimName: "claim-attach" });
+        expect(sandbox.currentSandbox).toEqual(sandboxData);
+    });
 });

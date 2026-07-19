@@ -5,7 +5,6 @@ import type { CreateAgentSandboxPayload } from "./generated/data-contracts";
 
 type SecurityData = { token: string };
 
-type Override<TBase, TOverride> = Omit<TBase, keyof TOverride> & TOverride;
 type UnwrapApiData<T> = T extends Promise<{ data: infer D }> ? Promise<D> : T;
 type InstanceMethods<T> = {
     [K in keyof T as T[K] extends (...args: any[]) => any ? K : never]: T[K]
@@ -20,14 +19,15 @@ type ApiDataMethods = {
 };
 type ApiWithDataResponses = Omit<ApiInstance, ApiEndpointMethodNames> & ApiDataMethods;
 
-type ApiMethodOverrides = Pick<
-    InstanceMethods<QuickStackClient>,
-    Extract<keyof InstanceMethods<QuickStackClient>, keyof ApiWithDataResponses>
->;
+type SandboxInstancesNamespace = {
+    create: (agentId: string, params?: CreateAgentSandboxPayload & { timeoutMs?: number }) => Promise<AgentSandboxInstance>;
+    attach: (agentId: string, claimName: string) => Promise<AgentSandboxInstance>;
+};
 
-export type QuickStackApiInstance = Override<ApiWithDataResponses, ApiMethodOverrides> & {
+export type QuickStackApiInstance = ApiWithDataResponses & {
     openApiClient: ApiInstance;
     setAuthToken: (token: string) => void;
+    sandboxInstances: SandboxInstancesNamespace;
 };
 
 export class QuickStackClient {
@@ -82,28 +82,25 @@ export class QuickStackClient {
             return name !== "securityWorker" && typeof method === "function" && typeof baseMethod !== "function";
         }) as ApiEndpointMethodNames[];
 
+        const endpointDataMethods: Partial<ApiDataMethods> = {};
         endpointMethodNames.forEach((name) => {
-            const original = (openapiClient as any)[name];
-            (openapiClient as any)[name] = async (...args: unknown[]) => {
+            const original = (openapiClient as any)[name] as (...args: unknown[]) => Promise<{ data: unknown }>;
+            (endpointDataMethods as any)[name] = async (...args: unknown[]) => {
                 const response = await original(...args);
                 return response.data;
             };
         });
 
-        const methodNames = Object.getOwnPropertyNames(QuickStackClient.prototype)
-            .filter((name) => name !== 'constructor') as Array<keyof InstanceMethods<QuickStackClient>>;
+        const sandboxInstances: SandboxInstancesNamespace = {
+            create: apiInstance.createSandboxInstance.bind(apiInstance),
+            attach: apiInstance.attachSandboxInstance.bind(apiInstance),
+        };
 
-        const boundMethods = methodNames.reduce((methods, name) => {
-            const method = (apiInstance as any)[name];
-            if (typeof method === 'function') {
-                methods[name] = method.bind(apiInstance);
-            }
-            return methods;
-        }, {} as InstanceMethods<QuickStackClient>);
-
-        return Object.assign(openapiClient, {
+        return Object.assign({}, openapiClient, endpointDataMethods, {
             openApiClient: openapiClient,
-        }, boundMethods) as unknown as QuickStackApiInstance;
+            setAuthToken: apiInstance.setAuthToken.bind(apiInstance),
+            sandboxInstances,
+        }) as unknown as QuickStackApiInstance;
     }
 
     setAuthToken(token: string) {
@@ -115,7 +112,7 @@ export class QuickStackClient {
      * @param agentId The ID of the agent for which to create the sandbox.
      * @param params Optional parameters for sandbox creation, including a timeout in milliseconds.
      */
-    async createAgentSandbox(agentId: string, params?: CreateAgentSandboxPayload & { timeoutMs: number }) {
+    async createSandboxInstance(agentId: string, params?: CreateAgentSandboxPayload & { timeoutMs?: number }) {
         return await AgentSandboxInstance.createSandbox({
             agentId,
             timeoutMs: params?.timeoutMs ?? 60000,
@@ -128,7 +125,7 @@ export class QuickStackClient {
      * @param agentId The ID of the agent for which to attach the sandbox.
      * @param claimName The claim name of the existing sandbox to attach to.
      */
-    async attachAgentSandbox(agentId: string, claimName: string) {
+    async attachSandboxInstance(agentId: string, claimName: string) {
         return await AgentSandboxInstance.attachSandbox(agentId, claimName, this.openApiClient);
     }
 }
