@@ -1,4 +1,4 @@
-import type { Api } from "./generated/Api";
+import type { QuickStackApi } from "./generated/Api";
 import type {
     CreateAgentSandboxData,
     CreateAgentSandboxPayload,
@@ -25,7 +25,7 @@ export class AgentSandboxInstance {
      *
      * @param openApiClient Authenticated API client used for all sandbox requests.
      */
-    private constructor(private readonly openApiClient: Api<{ token: string }>) { }
+    private constructor(private readonly openApiClient: QuickStackApi<{ token: string }>) { }
 
     /**
      * Creates a sandbox via the API and stores the returned sandbox state locally.
@@ -80,7 +80,7 @@ export class AgentSandboxInstance {
      * @param openApiClient Authenticated API client used for sandbox operations.
      * @returns A ready-to-use sandbox instance.
      */
-    static async createSandbox(data: CreateAgentSandboxParams & CreateAgentSandboxPayload, openApiClient: Api<{ token: string }>) {
+    static async createSandbox(data: CreateAgentSandboxParams & CreateAgentSandboxPayload, openApiClient: QuickStackApi<{ token: string }>) {
         const sandboxInstance = new AgentSandboxInstance(openApiClient);
         await sandboxInstance.initializeAndWait(data);
         return sandboxInstance;

@@ -46,7 +46,7 @@
     "registry": "https://registry.npmjs.org"
   },
   "scripts": {
-    "generate": "rm -f src/generated/Api.ts src/generated/data-contracts.ts src/generated/http-client.ts && bunx swagger-typescript-api generate -p quickstack.openapi.json -o src/generated -n quickstack.ts --modular --extract-request-body --extract-request-params --extract-response-body --extract-response-error",
+    "generate": "rm -f src/generated/Api.ts src/generated/data-contracts.ts src/generated/http-client.ts && bunx swagger-typescript-api generate -p quickstack.openapi.json -o src/generated -n quickstack.ts --modular --api-class-name QuickStackApi --extract-request-body --extract-request-params --extract-response-body --extract-response-error && sed -i 's/export class Api</export class QuickStackApi</' src/generated/Api.ts",
     "clean": "rm -rf dist",
     "build:js": "bun build ./src/index.ts --outfile ./dist/index.js --target node --format esm",
     "build:types": "tsc -p tsconfig.build.json",

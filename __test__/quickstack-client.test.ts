@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, test } from "bun:test";
-import { QuickStackClient } from "../src/quickstack-api";
+import { QuickStackClient } from "../src/quickstack-client";
 
 const envKeys = [
     "QUICKSTACK_BASE_URL",
