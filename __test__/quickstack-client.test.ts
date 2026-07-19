@@ -59,4 +59,31 @@ describe("QuickStackClient.create", () => {
 
         expect((client.openApiClient as any).securityData).toEqual({ token: "token-new" });
     });
+
+    test("sends bearer token for secured endpoints", async () => {
+        const originalFetch = globalThis.fetch;
+        let capturedAuthorization: string | null = null;
+
+        globalThis.fetch = (async (_input: RequestInfo | URL, init?: RequestInit) => {
+            const headers = new Headers(init?.headers);
+            capturedAuthorization = headers.get("authorization");
+
+            return new Response(JSON.stringify([]), {
+                status: 200,
+                headers: {
+                    "content-type": "application/json",
+                },
+            });
+        }) as typeof fetch;
+
+        try {
+            const client = QuickStackClient.create("https://api.quickstack.dev", "token-auth");
+            const projects = await client.listProjects();
+
+            expect(projects).toEqual([]);
+            expect(capturedAuthorization).toBe("Bearer token-auth");
+        } finally {
+            globalThis.fetch = originalFetch;
+        }
+    });
 });

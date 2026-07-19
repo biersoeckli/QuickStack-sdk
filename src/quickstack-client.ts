@@ -43,7 +43,10 @@ export class QuickStackClient {
         this.openApiClient = new QuickStackApi<SecurityData>({
             baseUrl,
             securityWorker: (securityData) => {
-                if (!securityData?.token) return {};
+                if (!securityData?.token) {
+                    console.warn("No auth token provided. Requests may fail due to missing authentication.");
+                    return {}
+                };
 
                 return {
                     headers: {
@@ -60,7 +63,7 @@ export class QuickStackClient {
      * Creates a new instance of `QuickStackClient` with the provided base URL and token.
      * If not provided, it will use the `QUICKSTACK_BASE_URL` and `QUICKSTACK_API_TOKEN` environment variables.
      * @param baseUrl Base URL for the QuickStack API. Defaults to `process.env.QUICKSTACK_API_TOKEN`.
-     * @param token Authentication token for the QuickStack API. Defaults to `process.env.API_TOKEN`.
+     * @param token Authentication token for the QuickStack API. Defaults to `process.env.QUICKSTACK_API_TOKEN`.
      * @returns An instance of `QuickStackApiInstance` with all API methods and additional utility methods.
      * @throws Error if the base URL or token is not provided and not set in the environment variables.
      */
@@ -76,7 +79,7 @@ export class QuickStackClient {
         const endpointMethodNames = Object.keys(openapiClient).filter((name) => {
             const method = (openapiClient as any)[name];
             const baseMethod = (httpClientBase as any)[name];
-            return typeof method === "function" && typeof baseMethod !== "function";
+            return name !== "securityWorker" && typeof method === "function" && typeof baseMethod !== "function";
         }) as ApiEndpointMethodNames[];
 
         endpointMethodNames.forEach((name) => {
