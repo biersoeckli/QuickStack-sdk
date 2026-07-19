@@ -110,11 +110,25 @@ export class QuickStackClient {
         this.openApiClient.setSecurityData({ token: token });
     }
 
+    /**
+     * Creates a new agent sandbox for the specified agent.
+     * @param agentId The ID of the agent for which to create the sandbox.
+     * @param params Optional parameters for sandbox creation, including a timeout in milliseconds.
+     */
     async createAgentSandbox(agentId: string, params?: CreateAgentSandboxPayload & { timeoutMs: number }) {
         return await AgentSandboxInstance.createSandbox({
             agentId,
             timeoutMs: params?.timeoutMs ?? 60000,
             ...params
         }, this.openApiClient);
+    }
+
+    /**
+     * Attaches to an existing agent sandbox for the specified agent and claim name.
+     * @param agentId The ID of the agent for which to attach the sandbox.
+     * @param claimName The claim name of the existing sandbox to attach to.
+     */
+    async attachAgentSandbox(agentId: string, claimName: string) {
+        return await AgentSandboxInstance.attachSandbox(agentId, claimName, this.openApiClient);
     }
 }

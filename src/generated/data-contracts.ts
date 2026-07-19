@@ -1301,6 +1301,7 @@ export type ListAgentSandboxesData = {
     | "SHUTDOWN"
     | "SHUTTING_DOWN"
     | "PENDING";
+  customTag: string | null;
   createdAt: string | null;
 }[];
 
@@ -1319,6 +1320,8 @@ export interface CreateAgentSandboxPayload {
    * @max 1440
    */
   idleTimeoutMinutes?: number;
+  /** @minLength 1 */
+  customTag?: string;
 }
 
 export interface CreateAgentSandboxParams {
@@ -1346,6 +1349,7 @@ export interface CreateAgentSandboxData {
     | "SHUTDOWN"
     | "SHUTTING_DOWN"
     | "PENDING";
+  customTag: string | null;
   createdAt: string | null;
 }
 
@@ -1376,6 +1380,7 @@ export interface GetAgentSandboxData {
     | "SHUTDOWN"
     | "SHUTTING_DOWN"
     | "PENDING";
+  customTag: string | null;
   createdAt: string | null;
 }
 
@@ -1407,7 +1412,6 @@ export interface GetAgentSandboxAccessUrlParams {
 }
 
 export interface GetAgentSandboxAccessUrlData {
-  /** @format uri */
   url: string;
   /**
    * @exclusiveMin 0

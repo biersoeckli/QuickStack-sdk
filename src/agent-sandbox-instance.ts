@@ -42,6 +42,11 @@ export class AgentSandboxInstance {
         this.agentSandboxInstance = res.data;
     }
 
+    private async initializeFromExisting(agentId: string, claimName: string) {
+        const res = await this.openApiClient.getAgentSandbox({ agentId, claimName });
+        this.agentSandboxInstance = res.data;
+    }
+
     /**
      * Returns the identifying parameters required for sandbox-scoped API calls.
      *
@@ -69,7 +74,6 @@ export class AgentSandboxInstance {
         if (!this.agentSandboxInstance) {
             throw new Error('Agent sandbox instance is not initialized.');
         }
-
         return this.agentSandboxInstance;
     }
 
@@ -83,6 +87,21 @@ export class AgentSandboxInstance {
     static async createSandbox(data: CreateAgentSandboxParams & CreateAgentSandboxPayload, openApiClient: QuickStackApi<{ token: string }>) {
         const sandboxInstance = new AgentSandboxInstance(openApiClient);
         await sandboxInstance.initializeAndWait(data);
+        return sandboxInstance;
+    }
+
+    /**
+     * Attaches to an existing sandbox instance using the provided agent ID and claim name.
+     * @param agentId 
+     * @param claimName 
+     * @param openApiClient 
+     * @returns 
+     */
+    static async attachSandbox(agentId: string, claimName: string, openApiClient: QuickStackApi<{
+        token: string
+    }>) {
+        const sandboxInstance = new AgentSandboxInstance(openApiClient);
+        await sandboxInstance.initializeFromExisting(agentId, claimName);
         return sandboxInstance;
     }
 
@@ -228,7 +247,7 @@ export class AgentSandboxInstance {
      */
     async writeFileFromBuffer(path: string, buffer: Buffer) {
         const dataBase64 = buffer.toString('base64');
-        this.writeFileBase64(path, dataBase64);
+        await this.writeFileBase64(path, dataBase64);
     }
 
     /**
@@ -240,7 +259,7 @@ export class AgentSandboxInstance {
     async writeFileFromLocalFilePath(sandboxPath: string, localPath: string) {
         const fs = await import('fs/promises');
         const buffer = await fs.readFile(localPath);
-        this.writeFileFromBuffer(sandboxPath, buffer);
+        await this.writeFileFromBuffer(sandboxPath, buffer);
     }
 
     /**
