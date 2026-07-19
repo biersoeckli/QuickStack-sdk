@@ -58,7 +58,7 @@ export class QuickStackClient {
 
     /**
      * Creates a new instance of `QuickStackClient` with the provided base URL and token.
-     * If not provided, it will use the `QUICKSTACK_BASE_URL` and `API_TOKEN` environment variables.
+     * If not provided, it will use the `QUICKSTACK_BASE_URL` and `QUICKSTACK_API_TOKEN` environment variables.
      * @param baseUrl Base URL for the QuickStack API. Defaults to `process.env.QUICKSTACK_API_TOKEN`.
      * @param token Authentication token for the QuickStack API. Defaults to `process.env.API_TOKEN`.
      * @returns An instance of `QuickStackApiInstance` with all API methods and additional utility methods.
