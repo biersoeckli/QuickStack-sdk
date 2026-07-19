@@ -39,6 +39,9 @@ import {
   GetAgentData,
   GetAgentError,
   GetAgentParams,
+  GetAgentSandboxAccessUrlData,
+  GetAgentSandboxAccessUrlError,
+  GetAgentSandboxAccessUrlParams,
   GetAgentSandboxData,
   GetAgentSandboxError,
   GetAgentSandboxParams,
@@ -441,6 +444,26 @@ export class Api<
     this.request<DeleteAgentSandboxData, DeleteAgentSandboxError>({
       path: `/api/v1/agents/${agentId}/sandboxes/${claimName}`,
       method: "DELETE",
+      secure: true,
+      format: "json",
+      ...params,
+    });
+  /**
+   * @description Get a temporary access URL to access the agent sandbox via the browser. This is only possible if a domain is configured for the agent and the agent serves an API or Web interface.
+   *
+   * @tags Agent Sandboxes
+   * @name GetAgentSandboxAccessUrl
+   * @summary Get agent sandbox access URL
+   * @request GET:/api/v1/agents/{agentId}/sandboxes/{claimName}/accessUrl/{domainId}
+   * @secure
+   */
+  getAgentSandboxAccessUrl = (
+    { agentId, claimName, domainId }: GetAgentSandboxAccessUrlParams,
+    params: RequestParams = {},
+  ) =>
+    this.request<GetAgentSandboxAccessUrlData, GetAgentSandboxAccessUrlError>({
+      path: `/api/v1/agents/${agentId}/sandboxes/${claimName}/accessUrl/${domainId}`,
+      method: "GET",
       secure: true,
       format: "json",
       ...params,

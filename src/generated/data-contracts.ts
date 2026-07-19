@@ -1400,6 +1400,29 @@ export type DeleteAgentSandboxError = {
   detail?: string;
 };
 
+export interface GetAgentSandboxAccessUrlParams {
+  agentId: string;
+  claimName: string;
+  domainId: string;
+}
+
+export interface GetAgentSandboxAccessUrlData {
+  /** @format uri */
+  url: string;
+  /**
+   * @exclusiveMin 0
+   * @max 9007199254740991
+   */
+  expiresAt: number;
+}
+
+export type GetAgentSandboxAccessUrlError = {
+  type: string;
+  title: string;
+  status: number;
+  detail?: string;
+};
+
 export interface RunAgentSandboxCommandPayload {
   /** @minLength 1 */
   command: string;
