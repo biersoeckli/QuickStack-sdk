@@ -1467,42 +1467,9 @@ export interface ReadAgentSandboxFileParams {
   sandboxName: string;
 }
 
-export interface ReadAgentSandboxFileData {
-  dataBase64: string;
-}
-
-export type ReadAgentSandboxFileError = {
-  type: string;
-  title: string;
-  status: number;
-  detail?: string;
-};
-
-export interface ReadAgentSandboxTextFileParams {
-  /** @minLength 1 */
-  path: string;
-  agentId: string;
-  sandboxName: string;
-}
-
-export interface ReadAgentSandboxTextFileData {
-  text: string;
-}
-
-export type ReadAgentSandboxTextFileError = {
-  type: string;
-  title: string;
-  status: number;
-  detail?: string;
-};
-
-export interface WriteAgentSandboxFilePayload {
-  /** @minLength 1 */
-  path: string;
-  dataBase64: string;
-}
-
 export interface WriteAgentSandboxFileParams {
+  /** @minLength 1 */
+  path: string;
   agentId: string;
   sandboxName: string;
 }
@@ -1510,26 +1477,6 @@ export interface WriteAgentSandboxFileParams {
 export type WriteAgentSandboxFileData = any;
 
 export type WriteAgentSandboxFileError = {
-  type: string;
-  title: string;
-  status: number;
-  detail?: string;
-};
-
-export interface WriteAgentSandboxTextFilePayload {
-  /** @minLength 1 */
-  path: string;
-  text: string;
-}
-
-export interface WriteAgentSandboxTextFileParams {
-  agentId: string;
-  sandboxName: string;
-}
-
-export type WriteAgentSandboxTextFileData = any;
-
-export type WriteAgentSandboxTextFileError = {
   type: string;
   title: string;
   status: number;

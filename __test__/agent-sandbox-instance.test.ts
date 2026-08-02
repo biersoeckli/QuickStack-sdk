@@ -73,10 +73,10 @@ describe("AgentSandboxInstance", () => {
 
         await Promise.resolve();
         expect(receivedPayload).toEqual({
-            params: { agentId: "agent-123", sandboxName: "sandbox-main" },
+            params: { agentId: "agent-123", sandboxName: "sandbox-main", path: "/tmp/example.bin" },
             payload: {
-                path: "/tmp/example.bin",
-                dataBase64: Buffer.from("hello").toString("base64"),
+                body: Buffer.from("hello"),
+                format: undefined,
             },
         });
 
@@ -105,8 +105,15 @@ describe("AgentSandboxInstance", () => {
         const openApiClient = {
             async writeAgentSandboxFile(params: unknown, payload: unknown) {
                 receivedPayload = { params, payload };
+                const body = (payload as any).body;
+                const consumed = new Promise<void>((resolve, reject) => {
+                    body.once("end", resolve);
+                    body.once("error", reject);
+                });
+                body.resume();
                 writeStarted.resolve();
                 await writeCall.promise;
+                await consumed;
                 return { data: undefined };
             },
         };
@@ -117,13 +124,14 @@ describe("AgentSandboxInstance", () => {
         const writePromise = sandbox.writeFileFromLocalFilePath("/tmp/example.txt", localPath);
 
         await writeStarted.promise;
-        expect(receivedPayload).toEqual({
-            params: { agentId: "agent-123", sandboxName: "sandbox-main" },
-            payload: {
-                path: "/tmp/example.txt",
-                dataBase64: Buffer.from("file-content").toString("base64"),
-            },
+        expect((receivedPayload as any).params).toEqual({
+            agentId: "agent-123",
+            sandboxName: "sandbox-main",
+            path: "/tmp/example.txt",
         });
+        expect((receivedPayload as any).payload.format).toBeUndefined();
+        expect((receivedPayload as any).payload.duplex).toBe("half");
+        expect((receivedPayload as any).payload.body.readable).toBe(true);
 
         let resolved = false;
         writePromise.then(() => {
@@ -138,5 +146,27 @@ describe("AgentSandboxInstance", () => {
         expect(resolved).toBe(true);
 
         await fs.rm(localPath, { force: true });
+    });
+
+    test("read helpers decode the streamed file response", async () => {
+        const openApiClient = {
+            async readAgentSandboxFile(params: unknown, requestParams: any) {
+                expect(params).toEqual({
+                    agentId: "agent-123",
+                    sandboxName: "sandbox-main",
+                    path: "/tmp/example.txt",
+                });
+                expect(requestParams).toEqual({ format: "arrayBuffer" });
+                return { data: new TextEncoder().encode("hello streamed").buffer };
+            },
+        };
+
+        const sandbox = createInstance(openApiClient);
+        (sandbox as any).agentSandboxInstance = sandboxData;
+
+        expect(await sandbox.readTextFile("/tmp/example.txt")).toEqual({ text: "hello streamed" });
+        expect(await sandbox.readFile("/tmp/example.txt")).toEqual({
+            dataBase64: Buffer.from("hello streamed").toString("base64"),
+        });
     });
 });

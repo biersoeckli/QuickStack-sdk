@@ -7,11 +7,18 @@ import type {
     GetAgentSandboxData,
     ListAgentSandboxFilesData,
     ListAgentSandboxesData,
-    ReadAgentSandboxFileData,
-    ReadAgentSandboxTextFileData,
     RunAgentSandboxCommandPayload,
-    WriteAgentSandboxTextFileData,
+    WriteAgentSandboxFileData,
 } from "./generated/data-contracts";
+import type { RequestParams } from "./generated/http-client";
+
+type ReadAgentSandboxFileData = { dataBase64: string };
+type ReadAgentSandboxTextFileData = { text: string };
+
+type FileRequestParams = RequestParams & {
+    body?: unknown;
+    duplex?: 'half';
+};
 
 /**
  * Manages the lifecycle and file/command operations for a single agent sandbox instance.
@@ -166,11 +173,8 @@ export class AgentSandboxInstance {
      * @returns Text file contents and metadata.
      */
     async readTextFile(path: string): Promise<ReadAgentSandboxTextFileData> {
-        const res = await this.openApiClient.readAgentSandboxTextFile({
-            ...this.getSandboxParams(),
-            path,
-        });
-        return res.data;
+        const buffer = await this.readFileAsBuffer(path);
+        return { text: buffer.toString('utf8') };
     }
 
     /**
@@ -180,17 +184,19 @@ export class AgentSandboxInstance {
      * @returns File payload and metadata.
      */
     async readFile(path: string): Promise<ReadAgentSandboxFileData> {
-        const res = await this.openApiClient.readAgentSandboxFile({
-            ...this.getSandboxParams(),
-            path,
-        });
-        return res.data;
+        const buffer = await this.readFileAsBuffer(path);
+        return { dataBase64: buffer.toString('base64') };
     }
 
     async readFileAsBuffer(path: string): Promise<Buffer> {
-        const fileData = await this.readFile(path);
-        const buffer = Buffer.from(fileData.dataBase64, 'base64');
-        return buffer;
+        const res = await this.openApiClient.readAgentSandboxFile(
+            {
+                ...this.getSandboxParams(),
+                path,
+            },
+            { format: 'arrayBuffer' },
+        );
+        return Buffer.from(res.data);
     }
 
     /**
@@ -199,9 +205,19 @@ export class AgentSandboxInstance {
      * @param localPath Local file path where the file will be saved.
      */
     async readFileAndSaveToPath(sandboxPath: string, localPath: string): Promise<void> {
-        const fs = await import('fs/promises');
-        const buffer = await this.readFileAsBuffer(sandboxPath);
-        await fs.writeFile(localPath, buffer);
+        const fs = await import('fs');
+        const { pipeline } = await import('stream/promises');
+        const { Readable } = await import('stream');
+        const response = await this.openApiClient.readAgentSandboxFile({
+            ...this.getSandboxParams(),
+            path: sandboxPath,
+        });
+
+        if (!response.body) {
+            throw new Error('The file response did not contain a readable stream.');
+        }
+
+        await pipeline(Readable.fromWeb(response.body), fs.createWriteStream(localPath));
     }
 
     /**
@@ -211,14 +227,8 @@ export class AgentSandboxInstance {
      * @param text Text content to write.
      * @returns API response for the write operation.
      */
-    async writeTextFile(path: string, text: string): Promise<WriteAgentSandboxTextFileData> {
-        const res = await this.openApiClient.writeAgentSandboxTextFile(
-            this.getSandboxParams(),
-            {
-                path,
-                text
-            },
-        );
+    async writeTextFile(path: string, text: string): Promise<WriteAgentSandboxFileData> {
+        const res = await this.writeFileBody(path, text);
         return res.data;
     }
 
@@ -230,13 +240,7 @@ export class AgentSandboxInstance {
      * @returns API response for the write operation.
      */
     async writeFileBase64(path: string, dataBase64: string) {
-        await this.openApiClient.writeAgentSandboxFile(
-            this.getSandboxParams(),
-            {
-                path,
-                dataBase64
-            },
-        );
+        await this.writeFileFromBuffer(path, Buffer.from(dataBase64, 'base64'));
     }
 
     /**
@@ -246,8 +250,7 @@ export class AgentSandboxInstance {
      * @returns API response for the write operation.
      */
     async writeFileFromBuffer(path: string, buffer: Buffer) {
-        const dataBase64 = buffer.toString('base64');
-        await this.writeFileBase64(path, dataBase64);
+        await this.writeFileBody(path, buffer);
     }
 
     /**
@@ -257,9 +260,24 @@ export class AgentSandboxInstance {
      * @returns API response for the write operation.
      */
     async writeFileFromLocalFilePath(sandboxPath: string, localPath: string) {
-        const fs = await import('fs/promises');
-        const buffer = await fs.readFile(localPath);
-        await this.writeFileFromBuffer(sandboxPath, buffer);
+        const fs = await import('fs');
+        const stream = fs.createReadStream(localPath);
+        await this.writeFileBody(sandboxPath, stream, true);
+    }
+
+    private async writeFileBody(path: string, body: string | Buffer | NodeJS.ReadableStream, duplex = false) {
+        const requestParams: FileRequestParams = {
+            body,
+            format: undefined,
+            ...(duplex ? { duplex: 'half' as const } : {}),
+        };
+        return this.openApiClient.writeAgentSandboxFile(
+            {
+                ...this.getSandboxParams(),
+                path,
+            },
+            requestParams,
+        );
     }
 
     /**

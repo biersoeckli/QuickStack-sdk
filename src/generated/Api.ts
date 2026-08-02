@@ -73,12 +73,7 @@ import {
   ListAppsParams,
   ListProjectsData,
   ListProjectsError,
-  ReadAgentSandboxFileData,
-  ReadAgentSandboxFileError,
   ReadAgentSandboxFileParams,
-  ReadAgentSandboxTextFileData,
-  ReadAgentSandboxTextFileError,
-  ReadAgentSandboxTextFileParams,
   RunAgentSandboxCommandData,
   RunAgentSandboxCommandError,
   RunAgentSandboxCommandParams,
@@ -99,11 +94,6 @@ import {
   WriteAgentSandboxFileData,
   WriteAgentSandboxFileError,
   WriteAgentSandboxFileParams,
-  WriteAgentSandboxFilePayload,
-  WriteAgentSandboxTextFileData,
-  WriteAgentSandboxTextFileError,
-  WriteAgentSandboxTextFileParams,
-  WriteAgentSandboxTextFilePayload,
 } from "./data-contracts";
 import { ContentType, HttpClient, RequestParams } from "./http-client";
 
@@ -496,7 +486,7 @@ export class QuickStackApi<
    *
    * @tags Agent Sandboxes
    * @name ReadAgentSandboxFile
-   * @summary Read file from agent sandbox
+   * @summary Stream file from agent sandbox
    * @request GET:/api/v1/agents/{agentId}/sandboxes/{sandboxName}/files/read
    * @secure
    */
@@ -504,33 +494,11 @@ export class QuickStackApi<
     { agentId, sandboxName, ...query }: ReadAgentSandboxFileParams,
     params: RequestParams = {},
   ) =>
-    this.request<ReadAgentSandboxFileData, ReadAgentSandboxFileError>({
+    this.request<any, any>({
       path: `/api/v1/agents/${agentId}/sandboxes/${sandboxName}/files/read`,
       method: "GET",
       query: query,
       secure: true,
-      format: "json",
-      ...params,
-    });
-  /**
-   * No description
-   *
-   * @tags Agent Sandboxes
-   * @name ReadAgentSandboxTextFile
-   * @summary Read text file from agent sandbox
-   * @request GET:/api/v1/agents/{agentId}/sandboxes/{sandboxName}/files/read-text
-   * @secure
-   */
-  readAgentSandboxTextFile = (
-    { agentId, sandboxName, ...query }: ReadAgentSandboxTextFileParams,
-    params: RequestParams = {},
-  ) =>
-    this.request<ReadAgentSandboxTextFileData, ReadAgentSandboxTextFileError>({
-      path: `/api/v1/agents/${agentId}/sandboxes/${sandboxName}/files/read-text`,
-      method: "GET",
-      query: query,
-      secure: true,
-      format: "json",
       ...params,
     });
   /**
@@ -538,49 +506,22 @@ export class QuickStackApi<
    *
    * @tags Agent Sandboxes
    * @name WriteAgentSandboxFile
-   * @summary Write file to agent sandbox
+   * @summary Stream file to agent sandbox
    * @request PUT:/api/v1/agents/{agentId}/sandboxes/{sandboxName}/files/write
    * @secure
    */
   writeAgentSandboxFile = (
-    { agentId, sandboxName }: WriteAgentSandboxFileParams,
-    data: WriteAgentSandboxFilePayload,
+    { agentId, sandboxName, ...query }: WriteAgentSandboxFileParams,
     params: RequestParams = {},
   ) =>
     this.request<WriteAgentSandboxFileData, WriteAgentSandboxFileError>({
       path: `/api/v1/agents/${agentId}/sandboxes/${sandboxName}/files/write`,
       method: "PUT",
-      body: data,
+      query: query,
       secure: true,
-      type: ContentType.Json,
       format: "json",
       ...params,
     });
-  /**
-   * No description
-   *
-   * @tags Agent Sandboxes
-   * @name WriteAgentSandboxTextFile
-   * @summary Write text file to agent sandbox
-   * @request PUT:/api/v1/agents/{agentId}/sandboxes/{sandboxName}/files/write-text
-   * @secure
-   */
-  writeAgentSandboxTextFile = (
-    { agentId, sandboxName }: WriteAgentSandboxTextFileParams,
-    data: WriteAgentSandboxTextFilePayload,
-    params: RequestParams = {},
-  ) =>
-    this.request<WriteAgentSandboxTextFileData, WriteAgentSandboxTextFileError>(
-      {
-        path: `/api/v1/agents/${agentId}/sandboxes/${sandboxName}/files/write-text`,
-        method: "PUT",
-        body: data,
-        secure: true,
-        type: ContentType.Json,
-        format: "json",
-        ...params,
-      },
-    );
   /**
    * No description
    *
