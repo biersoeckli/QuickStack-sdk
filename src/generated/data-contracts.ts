@@ -1434,7 +1434,7 @@ export interface RunAgentSandboxCommandPayload {
    * @max 3600
    * @default 120
    */
-  timeoutSec: number;
+  timeoutSec?: number;
   env?: Partial<Record<string, string>>;
 }
 

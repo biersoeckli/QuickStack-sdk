@@ -150,7 +150,6 @@ export class AgentSandboxInstance {
             this.getSandboxParams(),
             {
                 command,
-                timeoutSec: data?.timeoutSec ?? 120,
                 ...data
             },
         );
