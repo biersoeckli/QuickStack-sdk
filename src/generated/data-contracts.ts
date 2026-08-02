@@ -1288,7 +1288,6 @@ export interface ListAgentSandboxesParams {
 
 export type ListAgentSandboxesData = {
   agentId: string;
-  claimName: string;
   sandboxName: string;
   podName: string;
   namespace: string;
@@ -1313,7 +1312,7 @@ export type ListAgentSandboxesError = {
 };
 
 /** @default {} */
-export interface CreateAgentSandboxPayload {
+export interface StartAgentSandboxPayload {
   env?: Partial<Record<string, string>>;
   /**
    * @exclusiveMin 0
@@ -1324,7 +1323,7 @@ export interface CreateAgentSandboxPayload {
   customTag?: string;
 }
 
-export interface CreateAgentSandboxParams {
+export interface StartAgentSandboxParams {
   /**
    * @exclusiveMin 0
    * @max 900000
@@ -1334,9 +1333,8 @@ export interface CreateAgentSandboxParams {
   agentId: string;
 }
 
-export interface CreateAgentSandboxData {
+export interface StartAgentSandboxData {
   agentId: string;
-  claimName: string;
   sandboxName: string;
   podName: string;
   namespace: string;
@@ -1353,7 +1351,7 @@ export interface CreateAgentSandboxData {
   createdAt: string | null;
 }
 
-export type CreateAgentSandboxError = {
+export type StartAgentSandboxError = {
   type: string;
   title: string;
   status: number;
@@ -1362,12 +1360,11 @@ export type CreateAgentSandboxError = {
 
 export interface GetAgentSandboxParams {
   agentId: string;
-  claimName: string;
+  sandboxName: string;
 }
 
 export interface GetAgentSandboxData {
   agentId: string;
-  claimName: string;
   sandboxName: string;
   podName: string;
   namespace: string;
@@ -1393,7 +1390,7 @@ export type GetAgentSandboxError = {
 
 export interface DeleteAgentSandboxParams {
   agentId: string;
-  claimName: string;
+  sandboxName: string;
 }
 
 export type DeleteAgentSandboxData = any;
@@ -1407,7 +1404,7 @@ export type DeleteAgentSandboxError = {
 
 export interface GetAgentSandboxAccessUrlParams {
   agentId: string;
-  claimName: string;
+  sandboxName: string;
   domainId: string;
 }
 
@@ -1435,14 +1432,15 @@ export interface RunAgentSandboxCommandPayload {
   /**
    * @exclusiveMin 0
    * @max 3600
+   * @default 120
    */
-  timeoutSec?: number;
+  timeoutSec: number;
   env?: Partial<Record<string, string>>;
 }
 
 export interface RunAgentSandboxCommandParams {
   agentId: string;
-  claimName: string;
+  sandboxName: string;
 }
 
 export interface RunAgentSandboxCommandData {
@@ -1462,29 +1460,11 @@ export type RunAgentSandboxCommandError = {
   detail?: string;
 };
 
-export interface ReadAgentSandboxTextFileParams {
-  /** @minLength 1 */
-  path: string;
-  agentId: string;
-  claimName: string;
-}
-
-export interface ReadAgentSandboxTextFileData {
-  text: string;
-}
-
-export type ReadAgentSandboxTextFileError = {
-  type: string;
-  title: string;
-  status: number;
-  detail?: string;
-};
-
 export interface ReadAgentSandboxFileParams {
   /** @minLength 1 */
   path: string;
   agentId: string;
-  claimName: string;
+  sandboxName: string;
 }
 
 export interface ReadAgentSandboxFileData {
@@ -1498,20 +1478,18 @@ export type ReadAgentSandboxFileError = {
   detail?: string;
 };
 
-export interface WriteAgentSandboxTextFilePayload {
+export interface ReadAgentSandboxTextFileParams {
   /** @minLength 1 */
   path: string;
+  agentId: string;
+  sandboxName: string;
+}
+
+export interface ReadAgentSandboxTextFileData {
   text: string;
 }
 
-export interface WriteAgentSandboxTextFileParams {
-  agentId: string;
-  claimName: string;
-}
-
-export type WriteAgentSandboxTextFileData = any;
-
-export type WriteAgentSandboxTextFileError = {
+export type ReadAgentSandboxTextFileError = {
   type: string;
   title: string;
   status: number;
@@ -1526,7 +1504,7 @@ export interface WriteAgentSandboxFilePayload {
 
 export interface WriteAgentSandboxFileParams {
   agentId: string;
-  claimName: string;
+  sandboxName: string;
 }
 
 export type WriteAgentSandboxFileData = any;
@@ -1538,11 +1516,31 @@ export type WriteAgentSandboxFileError = {
   detail?: string;
 };
 
+export interface WriteAgentSandboxTextFilePayload {
+  /** @minLength 1 */
+  path: string;
+  text: string;
+}
+
+export interface WriteAgentSandboxTextFileParams {
+  agentId: string;
+  sandboxName: string;
+}
+
+export type WriteAgentSandboxTextFileData = any;
+
+export type WriteAgentSandboxTextFileError = {
+  type: string;
+  title: string;
+  status: number;
+  detail?: string;
+};
+
 export interface ListAgentSandboxFilesParams {
   /** @minLength 1 */
   path: string;
   agentId: string;
-  claimName: string;
+  sandboxName: string;
 }
 
 export type ListAgentSandboxFilesData = {
@@ -1572,7 +1570,7 @@ export interface CheckAgentSandboxFileExistsParams {
   /** @minLength 1 */
   path: string;
   agentId: string;
-  claimName: string;
+  sandboxName: string;
 }
 
 export interface CheckAgentSandboxFileExistsData {

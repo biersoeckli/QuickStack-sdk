@@ -1,8 +1,8 @@
 import type { QuickStackApi } from "./generated/Api";
 import type {
-    CreateAgentSandboxData,
-    CreateAgentSandboxPayload,
-    CreateAgentSandboxParams,
+    StartAgentSandboxData,
+    StartAgentSandboxPayload,
+    StartAgentSandboxParams,
     DeleteAgentSandboxData,
     GetAgentSandboxData,
     ListAgentSandboxFilesData,
@@ -18,7 +18,7 @@ import type {
  */
 export class AgentSandboxInstance {
 
-    private agentSandboxInstance: CreateAgentSandboxData | null = null;
+    private agentSandboxInstance: StartAgentSandboxData | null = null;
 
     /**
      * Creates an `AgentSandboxInstance` bound to the provided OpenAPI client.
@@ -32,18 +32,18 @@ export class AgentSandboxInstance {
      *
      * @param input Sandbox creation parameters and payload.
      */
-    private async initializeAndWait(input: CreateAgentSandboxParams & CreateAgentSandboxPayload) {
+    private async initializeAndWait(input: StartAgentSandboxParams & StartAgentSandboxPayload) {
         const { agentId, timeoutMs, ...data } = input;
         const params = {
             agentId,
             timeoutMs,
         };
-        const res = await this.openApiClient.createAgentSandbox(params, data);
+        const res = await this.openApiClient.startAgentSandbox(params, data);
         this.agentSandboxInstance = res.data;
     }
 
-    private async initializeFromExisting(agentId: string, claimName: string) {
-        const res = await this.openApiClient.getAgentSandbox({ agentId, claimName });
+    private async initializeFromExisting(agentId: string, sandboxName: string) {
+        const res = await this.openApiClient.getAgentSandbox({ agentId, sandboxName });
         this.agentSandboxInstance = res.data;
     }
 
@@ -51,7 +51,7 @@ export class AgentSandboxInstance {
      * Returns the identifying parameters required for sandbox-scoped API calls.
      *
      * @throws Error If the sandbox instance has not been initialized.
-     * @returns Object containing `agentId` and `claimName`.
+     * @returns Object containing `agentId` and `sandboxName`.
      */
     private getSandboxParams() {
         if (!this.agentSandboxInstance) {
@@ -60,7 +60,7 @@ export class AgentSandboxInstance {
 
         return {
             agentId: this.agentSandboxInstance.agentId,
-            claimName: this.agentSandboxInstance.claimName,
+            sandboxName: this.agentSandboxInstance.sandboxName,
         };
     }
 
@@ -70,7 +70,7 @@ export class AgentSandboxInstance {
      * @throws Error If the sandbox instance has not been initialized.
      * @returns The current sandbox data.
      */
-    get currentSandbox(): CreateAgentSandboxData {
+    get currentSandbox(): StartAgentSandboxData {
         if (!this.agentSandboxInstance) {
             throw new Error('Agent sandbox instance is not initialized.');
         }
@@ -84,24 +84,24 @@ export class AgentSandboxInstance {
      * @param openApiClient Authenticated API client used for sandbox operations.
      * @returns A ready-to-use sandbox instance.
      */
-    static async createSandbox(data: CreateAgentSandboxParams & CreateAgentSandboxPayload, openApiClient: QuickStackApi<{ token: string }>) {
+    static async createSandbox(data: StartAgentSandboxParams & StartAgentSandboxPayload, openApiClient: QuickStackApi<{ token: string }>) {
         const sandboxInstance = new AgentSandboxInstance(openApiClient);
         await sandboxInstance.initializeAndWait(data);
         return sandboxInstance;
     }
 
     /**
-     * Attaches to an existing sandbox instance using the provided agent ID and claim name.
+     * Attaches to an existing sandbox instance using the provided agent ID and sandbox name.
      * @param agentId 
-     * @param claimName 
+     * @param sandboxName 
      * @param openApiClient 
      * @returns 
      */
-    static async attachSandbox(agentId: string, claimName: string, openApiClient: QuickStackApi<{
+    static async attachSandbox(agentId: string, sandboxName: string, openApiClient: QuickStackApi<{
         token: string
     }>) {
         const sandboxInstance = new AgentSandboxInstance(openApiClient);
-        await sandboxInstance.initializeFromExisting(agentId, claimName);
+        await sandboxInstance.initializeFromExisting(agentId, sandboxName);
         return sandboxInstance;
     }
 
@@ -150,6 +150,7 @@ export class AgentSandboxInstance {
             this.getSandboxParams(),
             {
                 command,
+                timeoutSec: data?.timeoutSec ?? 120,
                 ...data
             },
         );

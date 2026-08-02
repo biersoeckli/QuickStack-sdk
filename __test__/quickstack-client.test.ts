@@ -104,7 +104,7 @@ describe("QuickStackClient.create", () => {
         let receivedParams: unknown;
         let receivedPayload: unknown;
 
-        (client.openApiClient as any).createAgentSandbox = async (params: unknown, payload: unknown) => {
+        (client.openApiClient as any).startAgentSandbox = async (params: unknown, payload: unknown) => {
             receivedParams = params;
             receivedPayload = payload;
             return { data: sandboxData };
@@ -126,7 +126,7 @@ describe("QuickStackClient.create", () => {
         expect(sandbox.currentSandbox).toEqual(sandboxData);
     });
 
-    test("createAgentSandbox endpoint remains directly callable", async () => {
+    test("startAgentSandbox endpoint remains directly callable", async () => {
         const originalFetch = globalThis.fetch;
 
         const sandboxData = {
@@ -151,7 +151,7 @@ describe("QuickStackClient.create", () => {
 
         try {
             const client = QuickStackClient.create("https://api.quickstack.dev", "token-endpoint");
-            const created = await client.createAgentSandbox(
+            const created = await client.startAgentSandbox(
                 { agentId: "agent-endpoint", timeoutMs: 60000 },
                 { idleTimeoutMinutes: 15, env: { NODE_ENV: "test" } },
             );
@@ -183,9 +183,9 @@ describe("QuickStackClient.create", () => {
             return { data: sandboxData };
         };
 
-        const sandbox = await client.sandboxInstances.attach("agent-attach", "claim-attach");
+        const sandbox = await client.sandboxInstances.attach("agent-attach", "sandbox-attach");
 
-        expect(receivedParams).toEqual({ agentId: "agent-attach", claimName: "claim-attach" });
+        expect(receivedParams).toEqual({ agentId: "agent-attach", sandboxName: "sandbox-attach" });
         expect(sandbox.currentSandbox).toEqual(sandboxData);
     });
 });

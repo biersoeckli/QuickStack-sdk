@@ -1,7 +1,7 @@
 import { AgentSandboxInstance } from "./agent-sandbox-instance";
 import { QuickStackApi } from "./generated/Api";
 import { HttpClient } from "./generated/http-client";
-import type { CreateAgentSandboxPayload } from "./generated/data-contracts";
+import type { StartAgentSandboxPayload } from "./generated/data-contracts";
 
 type SecurityData = { token: string };
 
@@ -20,8 +20,8 @@ type ApiDataMethods = {
 type ApiWithDataResponses = Omit<ApiInstance, ApiEndpointMethodNames> & ApiDataMethods;
 
 type SandboxInstancesNamespace = {
-    create: (agentId: string, params?: CreateAgentSandboxPayload & { timeoutMs?: number }) => Promise<AgentSandboxInstance>;
-    attach: (agentId: string, claimName: string) => Promise<AgentSandboxInstance>;
+    create: (agentId: string, params?: StartAgentSandboxPayload & { timeoutMs?: number }) => Promise<AgentSandboxInstance>;
+    attach: (agentId: string, sandboxName: string) => Promise<AgentSandboxInstance>;
 };
 
 export type QuickStackApiInstance = ApiWithDataResponses & {
@@ -112,7 +112,7 @@ export class QuickStackClient {
      * @param agentId The ID of the agent for which to create the sandbox.
      * @param params Optional parameters for sandbox creation, including a timeout in milliseconds.
      */
-    async createSandboxInstance(agentId: string, params?: CreateAgentSandboxPayload & { timeoutMs?: number }) {
+    async createSandboxInstance(agentId: string, params?: StartAgentSandboxPayload & { timeoutMs?: number }) {
         return await AgentSandboxInstance.createSandbox({
             agentId,
             timeoutMs: params?.timeoutMs ?? 60000,
@@ -121,11 +121,11 @@ export class QuickStackClient {
     }
 
     /**
-     * Attaches to an existing agent sandbox for the specified agent and claim name.
+     * Attaches to an existing agent sandbox for the specified agent and sandbox name.
      * @param agentId The ID of the agent for which to attach the sandbox.
-     * @param claimName The claim name of the existing sandbox to attach to.
+     * @param sandboxName The name of the existing sandbox to attach to.
      */
-    async attachSandboxInstance(agentId: string, claimName: string) {
-        return await AgentSandboxInstance.attachSandbox(agentId, claimName, this.openApiClient);
+    async attachSandboxInstance(agentId: string, sandboxName: string) {
+        return await AgentSandboxInstance.attachSandbox(agentId, sandboxName, this.openApiClient);
     }
 }

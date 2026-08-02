@@ -48,9 +48,9 @@ describe("AgentSandboxInstance", () => {
             },
         };
 
-        const sandbox = await AgentSandboxInstance.attachSandbox("agent-123", "claim-abc", openApiClient as any);
+        const sandbox = await AgentSandboxInstance.attachSandbox("agent-123", "sandbox-main", openApiClient as any);
 
-        expect(receivedParams).toEqual({ agentId: "agent-123", claimName: "claim-abc" });
+        expect(receivedParams).toEqual({ agentId: "agent-123", sandboxName: "sandbox-main" });
         expect(sandbox.currentSandbox).toEqual(sandboxData);
     });
 
@@ -73,7 +73,7 @@ describe("AgentSandboxInstance", () => {
 
         await Promise.resolve();
         expect(receivedPayload).toEqual({
-            params: { agentId: "agent-123", claimName: "claim-abc" },
+            params: { agentId: "agent-123", sandboxName: "sandbox-main" },
             payload: {
                 path: "/tmp/example.bin",
                 dataBase64: Buffer.from("hello").toString("base64"),
@@ -118,7 +118,7 @@ describe("AgentSandboxInstance", () => {
 
         await writeStarted.promise;
         expect(receivedPayload).toEqual({
-            params: { agentId: "agent-123", claimName: "claim-abc" },
+            params: { agentId: "agent-123", sandboxName: "sandbox-main" },
             payload: {
                 path: "/tmp/example.txt",
                 dataBase64: Buffer.from("file-content").toString("base64"),

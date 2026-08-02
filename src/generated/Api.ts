@@ -14,10 +14,6 @@ import {
   CheckAgentSandboxFileExistsData,
   CheckAgentSandboxFileExistsError,
   CheckAgentSandboxFileExistsParams,
-  CreateAgentSandboxData,
-  CreateAgentSandboxError,
-  CreateAgentSandboxParams,
-  CreateAgentSandboxPayload,
   DeleteAgentData,
   DeleteAgentError,
   DeleteAgentParams,
@@ -96,6 +92,10 @@ import {
   SaveProjectData,
   SaveProjectError,
   SaveProjectPayload,
+  StartAgentSandboxData,
+  StartAgentSandboxError,
+  StartAgentSandboxParams,
+  StartAgentSandboxPayload,
   WriteAgentSandboxFileData,
   WriteAgentSandboxFileError,
   WriteAgentSandboxFileParams,
@@ -344,11 +344,11 @@ export class QuickStackApi<
       ...params,
     });
   /**
-   * @description Deploys the agent with the given ID. This does not start any agent, it just applies the configuration to the SandboxTemplate.
+   * @description Deploys the agent with the given ID. This does not start any agent sandbox, it just applies the configuration to kubernetes (SandboxTemplate). Every new agent sandbox created after this deployment will use the newly applied configuration. This can only be done, wehen no sandbox is running.
    *
    * @tags Agents
    * @name DeployAgent
-   * @summary Deploy agent
+   * @summary Deploy agent configuration
    * @request POST:/api/v1/agents/{agentId}/deploy
    * @secure
    */
@@ -365,7 +365,7 @@ export class QuickStackApi<
       ...params,
     });
   /**
-   * No description
+   * @description List all running agent sandboxes for the given agent ID.
    *
    * @tags Agent Sandboxes
    * @name ListAgentSandboxes
@@ -388,17 +388,17 @@ export class QuickStackApi<
    * No description
    *
    * @tags Agent Sandboxes
-   * @name CreateAgentSandbox
-   * @summary Create agent sandbox
+   * @name StartAgentSandbox
+   * @summary Start agent sandbox
    * @request POST:/api/v1/agents/{agentId}/sandboxes
    * @secure
    */
-  createAgentSandbox = (
-    { agentId, ...query }: CreateAgentSandboxParams,
-    data: CreateAgentSandboxPayload,
+  startAgentSandbox = (
+    { agentId, ...query }: StartAgentSandboxParams,
+    data: StartAgentSandboxPayload,
     params: RequestParams = {},
   ) =>
-    this.request<CreateAgentSandboxData, CreateAgentSandboxError>({
+    this.request<StartAgentSandboxData, StartAgentSandboxError>({
       path: `/api/v1/agents/${agentId}/sandboxes`,
       method: "POST",
       query: query,
@@ -414,15 +414,15 @@ export class QuickStackApi<
    * @tags Agent Sandboxes
    * @name GetAgentSandbox
    * @summary Get agent sandbox
-   * @request GET:/api/v1/agents/{agentId}/sandboxes/{claimName}
+   * @request GET:/api/v1/agents/{agentId}/sandboxes/{sandboxName}
    * @secure
    */
   getAgentSandbox = (
-    { agentId, claimName }: GetAgentSandboxParams,
+    { agentId, sandboxName }: GetAgentSandboxParams,
     params: RequestParams = {},
   ) =>
     this.request<GetAgentSandboxData, GetAgentSandboxError>({
-      path: `/api/v1/agents/${agentId}/sandboxes/${claimName}`,
+      path: `/api/v1/agents/${agentId}/sandboxes/${sandboxName}`,
       method: "GET",
       secure: true,
       format: "json",
@@ -434,15 +434,15 @@ export class QuickStackApi<
    * @tags Agent Sandboxes
    * @name DeleteAgentSandbox
    * @summary Delete agent sandbox
-   * @request DELETE:/api/v1/agents/{agentId}/sandboxes/{claimName}
+   * @request DELETE:/api/v1/agents/{agentId}/sandboxes/{sandboxName}
    * @secure
    */
   deleteAgentSandbox = (
-    { agentId, claimName }: DeleteAgentSandboxParams,
+    { agentId, sandboxName }: DeleteAgentSandboxParams,
     params: RequestParams = {},
   ) =>
     this.request<DeleteAgentSandboxData, DeleteAgentSandboxError>({
-      path: `/api/v1/agents/${agentId}/sandboxes/${claimName}`,
+      path: `/api/v1/agents/${agentId}/sandboxes/${sandboxName}`,
       method: "DELETE",
       secure: true,
       format: "json",
@@ -454,15 +454,15 @@ export class QuickStackApi<
    * @tags Agent Sandboxes
    * @name GetAgentSandboxAccessUrl
    * @summary Get agent sandbox access URL
-   * @request GET:/api/v1/agents/{agentId}/sandboxes/{claimName}/accessUrl/{domainId}
+   * @request GET:/api/v1/agents/{agentId}/sandboxes/{sandboxName}/accessUrl/{domainId}
    * @secure
    */
   getAgentSandboxAccessUrl = (
-    { agentId, claimName, domainId }: GetAgentSandboxAccessUrlParams,
+    { agentId, sandboxName, domainId }: GetAgentSandboxAccessUrlParams,
     params: RequestParams = {},
   ) =>
     this.request<GetAgentSandboxAccessUrlData, GetAgentSandboxAccessUrlError>({
-      path: `/api/v1/agents/${agentId}/sandboxes/${claimName}/accessUrl/${domainId}`,
+      path: `/api/v1/agents/${agentId}/sandboxes/${sandboxName}/accessUrl/${domainId}`,
       method: "GET",
       secure: true,
       format: "json",
@@ -474,16 +474,16 @@ export class QuickStackApi<
    * @tags Agent Sandboxes
    * @name RunAgentSandboxCommand
    * @summary Run command in agent sandbox
-   * @request POST:/api/v1/agents/{agentId}/sandboxes/{claimName}/commands
+   * @request POST:/api/v1/agents/{agentId}/sandboxes/{sandboxName}/commands
    * @secure
    */
   runAgentSandboxCommand = (
-    { agentId, claimName }: RunAgentSandboxCommandParams,
+    { agentId, sandboxName }: RunAgentSandboxCommandParams,
     data: RunAgentSandboxCommandPayload,
     params: RequestParams = {},
   ) =>
     this.request<RunAgentSandboxCommandData, RunAgentSandboxCommandError>({
-      path: `/api/v1/agents/${agentId}/sandboxes/${claimName}/commands`,
+      path: `/api/v1/agents/${agentId}/sandboxes/${sandboxName}/commands`,
       method: "POST",
       body: data,
       secure: true,
@@ -495,17 +495,17 @@ export class QuickStackApi<
    * No description
    *
    * @tags Agent Sandboxes
-   * @name ReadAgentSandboxTextFile
-   * @summary Read text file from agent sandbox
-   * @request GET:/api/v1/agents/{agentId}/sandboxes/{claimName}/files/read-text
+   * @name ReadAgentSandboxFile
+   * @summary Read file from agent sandbox
+   * @request GET:/api/v1/agents/{agentId}/sandboxes/{sandboxName}/files/read
    * @secure
    */
-  readAgentSandboxTextFile = (
-    { agentId, claimName, ...query }: ReadAgentSandboxTextFileParams,
+  readAgentSandboxFile = (
+    { agentId, sandboxName, ...query }: ReadAgentSandboxFileParams,
     params: RequestParams = {},
   ) =>
-    this.request<ReadAgentSandboxTextFileData, ReadAgentSandboxTextFileError>({
-      path: `/api/v1/agents/${agentId}/sandboxes/${claimName}/files/read-text`,
+    this.request<ReadAgentSandboxFileData, ReadAgentSandboxFileError>({
+      path: `/api/v1/agents/${agentId}/sandboxes/${sandboxName}/files/read`,
       method: "GET",
       query: query,
       secure: true,
@@ -516,20 +516,43 @@ export class QuickStackApi<
    * No description
    *
    * @tags Agent Sandboxes
-   * @name ReadAgentSandboxFile
-   * @summary Read file from agent sandbox
-   * @request GET:/api/v1/agents/{agentId}/sandboxes/{claimName}/files/read
+   * @name ReadAgentSandboxTextFile
+   * @summary Read text file from agent sandbox
+   * @request GET:/api/v1/agents/{agentId}/sandboxes/{sandboxName}/files/read-text
    * @secure
    */
-  readAgentSandboxFile = (
-    { agentId, claimName, ...query }: ReadAgentSandboxFileParams,
+  readAgentSandboxTextFile = (
+    { agentId, sandboxName, ...query }: ReadAgentSandboxTextFileParams,
     params: RequestParams = {},
   ) =>
-    this.request<ReadAgentSandboxFileData, ReadAgentSandboxFileError>({
-      path: `/api/v1/agents/${agentId}/sandboxes/${claimName}/files/read`,
+    this.request<ReadAgentSandboxTextFileData, ReadAgentSandboxTextFileError>({
+      path: `/api/v1/agents/${agentId}/sandboxes/${sandboxName}/files/read-text`,
       method: "GET",
       query: query,
       secure: true,
+      format: "json",
+      ...params,
+    });
+  /**
+   * No description
+   *
+   * @tags Agent Sandboxes
+   * @name WriteAgentSandboxFile
+   * @summary Write file to agent sandbox
+   * @request PUT:/api/v1/agents/{agentId}/sandboxes/{sandboxName}/files/write
+   * @secure
+   */
+  writeAgentSandboxFile = (
+    { agentId, sandboxName }: WriteAgentSandboxFileParams,
+    data: WriteAgentSandboxFilePayload,
+    params: RequestParams = {},
+  ) =>
+    this.request<WriteAgentSandboxFileData, WriteAgentSandboxFileError>({
+      path: `/api/v1/agents/${agentId}/sandboxes/${sandboxName}/files/write`,
+      method: "PUT",
+      body: data,
+      secure: true,
+      type: ContentType.Json,
       format: "json",
       ...params,
     });
@@ -539,17 +562,17 @@ export class QuickStackApi<
    * @tags Agent Sandboxes
    * @name WriteAgentSandboxTextFile
    * @summary Write text file to agent sandbox
-   * @request PUT:/api/v1/agents/{agentId}/sandboxes/{claimName}/files/write-text
+   * @request PUT:/api/v1/agents/{agentId}/sandboxes/{sandboxName}/files/write-text
    * @secure
    */
   writeAgentSandboxTextFile = (
-    { agentId, claimName }: WriteAgentSandboxTextFileParams,
+    { agentId, sandboxName }: WriteAgentSandboxTextFileParams,
     data: WriteAgentSandboxTextFilePayload,
     params: RequestParams = {},
   ) =>
     this.request<WriteAgentSandboxTextFileData, WriteAgentSandboxTextFileError>(
       {
-        path: `/api/v1/agents/${agentId}/sandboxes/${claimName}/files/write-text`,
+        path: `/api/v1/agents/${agentId}/sandboxes/${sandboxName}/files/write-text`,
         method: "PUT",
         body: data,
         secure: true,
@@ -562,40 +585,17 @@ export class QuickStackApi<
    * No description
    *
    * @tags Agent Sandboxes
-   * @name WriteAgentSandboxFile
-   * @summary Write file to agent sandbox
-   * @request PUT:/api/v1/agents/{agentId}/sandboxes/{claimName}/files/write
-   * @secure
-   */
-  writeAgentSandboxFile = (
-    { agentId, claimName }: WriteAgentSandboxFileParams,
-    data: WriteAgentSandboxFilePayload,
-    params: RequestParams = {},
-  ) =>
-    this.request<WriteAgentSandboxFileData, WriteAgentSandboxFileError>({
-      path: `/api/v1/agents/${agentId}/sandboxes/${claimName}/files/write`,
-      method: "PUT",
-      body: data,
-      secure: true,
-      type: ContentType.Json,
-      format: "json",
-      ...params,
-    });
-  /**
-   * No description
-   *
-   * @tags Agent Sandboxes
    * @name ListAgentSandboxFiles
    * @summary List files in agent sandbox
-   * @request GET:/api/v1/agents/{agentId}/sandboxes/{claimName}/files/list
+   * @request GET:/api/v1/agents/{agentId}/sandboxes/{sandboxName}/files/list
    * @secure
    */
   listAgentSandboxFiles = (
-    { agentId, claimName, ...query }: ListAgentSandboxFilesParams,
+    { agentId, sandboxName, ...query }: ListAgentSandboxFilesParams,
     params: RequestParams = {},
   ) =>
     this.request<ListAgentSandboxFilesData, ListAgentSandboxFilesError>({
-      path: `/api/v1/agents/${agentId}/sandboxes/${claimName}/files/list`,
+      path: `/api/v1/agents/${agentId}/sandboxes/${sandboxName}/files/list`,
       method: "GET",
       query: query,
       secure: true,
@@ -608,18 +608,18 @@ export class QuickStackApi<
    * @tags Agent Sandboxes
    * @name CheckAgentSandboxFileExists
    * @summary Check file exists in agent sandbox
-   * @request GET:/api/v1/agents/{agentId}/sandboxes/{claimName}/files/exists
+   * @request GET:/api/v1/agents/{agentId}/sandboxes/{sandboxName}/files/exists
    * @secure
    */
   checkAgentSandboxFileExists = (
-    { agentId, claimName, ...query }: CheckAgentSandboxFileExistsParams,
+    { agentId, sandboxName, ...query }: CheckAgentSandboxFileExistsParams,
     params: RequestParams = {},
   ) =>
     this.request<
       CheckAgentSandboxFileExistsData,
       CheckAgentSandboxFileExistsError
     >({
-      path: `/api/v1/agents/${agentId}/sandboxes/${claimName}/files/exists`,
+      path: `/api/v1/agents/${agentId}/sandboxes/${sandboxName}/files/exists`,
       method: "GET",
       query: query,
       secure: true,
