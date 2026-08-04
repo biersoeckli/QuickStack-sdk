@@ -1467,6 +1467,11 @@ export interface ReadAgentSandboxFileParams {
   sandboxName: string;
 }
 
+export interface WriteAgentSandboxFilePayload {
+  /** @format binary */
+  file: File;
+}
+
 export interface WriteAgentSandboxFileParams {
   /** @minLength 1 */
   path: string;

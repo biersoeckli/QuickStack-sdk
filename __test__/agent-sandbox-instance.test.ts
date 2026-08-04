@@ -56,7 +56,7 @@ describe("AgentSandboxInstance", () => {
 
     test("writeFileFromBuffer waits for the API write to complete", async () => {
         const writeCall = deferred<void>();
-        let receivedPayload: unknown;
+        let receivedPayload: any;
 
         const openApiClient = {
             async writeAgentSandboxFile(params: unknown, payload: unknown) {
@@ -72,13 +72,13 @@ describe("AgentSandboxInstance", () => {
         const writePromise = sandbox.writeFileFromBuffer("/tmp/example.bin", Buffer.from("hello"));
 
         await Promise.resolve();
-        expect(receivedPayload).toEqual({
-            params: { agentId: "agent-123", sandboxName: "sandbox-main", path: "/tmp/example.bin" },
-            payload: {
-                body: Buffer.from("hello"),
-                format: undefined,
-            },
+        expect(receivedPayload.params).toEqual({
+            agentId: "agent-123", sandboxName: "sandbox-main", path: "/tmp/example.bin",
         });
+        expect(receivedPayload.payload).toBeInstanceOf(FormData);
+        const bufferFile = receivedPayload.payload.get("file") as File;
+        expect(bufferFile.name).toBe("example.bin");
+        expect(await bufferFile.text()).toBe("hello");
 
         let resolved = false;
         writePromise.then(() => {
@@ -105,15 +105,8 @@ describe("AgentSandboxInstance", () => {
         const openApiClient = {
             async writeAgentSandboxFile(params: unknown, payload: unknown) {
                 receivedPayload = { params, payload };
-                const body = (payload as any).body;
-                const consumed = new Promise<void>((resolve, reject) => {
-                    body.once("end", resolve);
-                    body.once("error", reject);
-                });
-                body.resume();
                 writeStarted.resolve();
                 await writeCall.promise;
-                await consumed;
                 return { data: undefined };
             },
         };
@@ -129,9 +122,10 @@ describe("AgentSandboxInstance", () => {
             sandboxName: "sandbox-main",
             path: "/tmp/example.txt",
         });
-        expect((receivedPayload as any).payload.format).toBeUndefined();
-        expect((receivedPayload as any).payload.duplex).toBe("half");
-        expect((receivedPayload as any).payload.body.readable).toBe(true);
+        expect((receivedPayload as any).payload).toBeInstanceOf(FormData);
+        const localFile = (receivedPayload as any).payload.get("file") as File;
+        expect(localFile.name).toBe("example.txt");
+        expect(await localFile.text()).toBe("file-content");
 
         let resolved = false;
         writePromise.then(() => {

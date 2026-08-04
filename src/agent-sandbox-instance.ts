@@ -9,16 +9,11 @@ import type {
     ListAgentSandboxesData,
     RunAgentSandboxCommandPayload,
     WriteAgentSandboxFileData,
+    WriteAgentSandboxFilePayload,
 } from "./generated/data-contracts";
-import type { RequestParams } from "./generated/http-client";
 
 type ReadAgentSandboxFileData = { dataBase64: string };
 type ReadAgentSandboxTextFileData = { text: string };
-
-type FileRequestParams = RequestParams & {
-    body?: unknown;
-    duplex?: 'half';
-};
 
 /**
  * Manages the lifecycle and file/command operations for a single agent sandbox instance.
@@ -260,23 +255,21 @@ export class AgentSandboxInstance {
      * @returns API response for the write operation.
      */
     async writeFileFromLocalFilePath(sandboxPath: string, localPath: string) {
-        const fs = await import('fs');
-        const stream = fs.createReadStream(localPath);
-        await this.writeFileBody(sandboxPath, stream, true);
+        const fs = await import('fs/promises');
+        await this.writeFileBody(sandboxPath, await fs.readFile(localPath));
     }
 
-    private async writeFileBody(path: string, body: string | Buffer | NodeJS.ReadableStream, duplex = false) {
-        const requestParams: FileRequestParams = {
-            body,
-            format: undefined,
-            ...(duplex ? { duplex: 'half' as const } : {}),
-        };
+    private async writeFileBody(path: string, body: string | Buffer) {
+        const formData = new FormData();
+        const filename = path.split('/').filter(Boolean).pop() || 'file';
+        formData.append('file', new Blob([body]), filename);
+
         return this.openApiClient.writeAgentSandboxFile(
             {
                 ...this.getSandboxParams(),
                 path,
             },
-            requestParams,
+            formData as unknown as WriteAgentSandboxFilePayload,
         );
     }
 

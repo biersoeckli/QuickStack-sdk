@@ -87,6 +87,39 @@ describe("QuickStackClient.create", () => {
         }
     });
 
+    test("sends sandbox uploads as multipart data with a file field", async () => {
+        const originalFetch = globalThis.fetch;
+        let receivedBody: Uint8Array | undefined;
+        let receivedFileName: string | undefined;
+
+        globalThis.fetch = (async (_input: RequestInfo | URL, init?: RequestInit) => {
+            expect(init?.body).toBeInstanceOf(FormData);
+            const file = (init?.body as FormData).get("file");
+            expect(file).toBeInstanceOf(Blob);
+            receivedBody = new Uint8Array(await (file as Blob).arrayBuffer());
+            receivedFileName = (file as File).name;
+            return new Response("{}", {
+                status: 200,
+                headers: { "content-type": "application/json" },
+            });
+        }) as typeof fetch;
+
+        try {
+            const client = QuickStackClient.create("https://api.quickstack.dev", "token-upload");
+            const content = new TextEncoder().encode("PDF bytes, not JSON");
+
+            await client.writeAgentSandboxFile(
+                { agentId: "agent-123", sandboxName: "sandbox-main", path: "/tmp/test-docs.pdf" },
+                { file: new File([content], "test-docs.pdf", { type: "application/pdf" }) },
+            );
+
+            expect(receivedBody).toEqual(content);
+            expect(receivedFileName).toBe("test-docs.pdf");
+        } finally {
+            globalThis.fetch = originalFetch;
+        }
+    });
+
     test("sandboxInstances.create uses internal OpenAPI endpoint without recursion", async () => {
         const client = QuickStackClient.create("https://api.quickstack.dev", "token-sandbox");
 

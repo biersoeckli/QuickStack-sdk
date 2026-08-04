@@ -94,6 +94,7 @@ import {
   WriteAgentSandboxFileData,
   WriteAgentSandboxFileError,
   WriteAgentSandboxFileParams,
+  WriteAgentSandboxFilePayload,
 } from "./data-contracts";
 import { ContentType, HttpClient, RequestParams } from "./http-client";
 
@@ -482,7 +483,7 @@ export class QuickStackApi<
       ...params,
     });
   /**
-   * No description
+   * @description Stream a file from an agent sandbox. Requires write access to the agent.
    *
    * @tags Agent Sandboxes
    * @name ReadAgentSandboxFile
@@ -502,7 +503,7 @@ export class QuickStackApi<
       ...params,
     });
   /**
-   * No description
+   * @description Writes one file into the running sandbox. Existing content at `path` is replaced. Use `multipart/form-data` and provide the upload in the required `file` field. This is the supported contract for generated OpenAPI clients. `swagger-typescript-api` example: ```ts await client.writeAgentSandboxFile( { agentId, sandboxName, path: '/workspace/document.pdf' }, { file }, // Browser File or Blob ); ``` Do not JSON-serialize the file and do not wrap it in a `body` field. JSON serialization of an `ArrayBuffer` produces `{}` and writes that text to the sandbox file. Two request formats are supported: - `multipart/form-data`: required `file` field; preferred for generated OpenAPI clients. - `application/octet-stream`: request body contains raw file bytes; preferred for direct or streaming HTTP clients.
    *
    * @tags Agent Sandboxes
    * @name WriteAgentSandboxFile
@@ -512,18 +513,21 @@ export class QuickStackApi<
    */
   writeAgentSandboxFile = (
     { agentId, sandboxName, ...query }: WriteAgentSandboxFileParams,
+    data: WriteAgentSandboxFilePayload,
     params: RequestParams = {},
   ) =>
     this.request<WriteAgentSandboxFileData, WriteAgentSandboxFileError>({
       path: `/api/v1/agents/${agentId}/sandboxes/${sandboxName}/files/write`,
       method: "PUT",
       query: query,
+      body: data,
       secure: true,
+      type: ContentType.FormData,
       format: "json",
       ...params,
     });
   /**
-   * No description
+   * @description List files in an agent sandbox. Requires write access to the agent.
    *
    * @tags Agent Sandboxes
    * @name ListAgentSandboxFiles
@@ -544,7 +548,7 @@ export class QuickStackApi<
       ...params,
     });
   /**
-   * No description
+   * @description Check a file in an agent sandbox. Requires write access to the agent.
    *
    * @tags Agent Sandboxes
    * @name CheckAgentSandboxFileExists
