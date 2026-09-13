@@ -120,8 +120,6 @@ export type ListAppsData = {
   cpuReservation?: number | null;
   cpuLimit?: number | null;
   webhookId?: string | null;
-  ingressNetworkPolicy: string;
-  egressNetworkPolicy: string;
   useNetworkPolicy: boolean;
   healthChechHttpGetPath?: string | null;
   healthCheckHttpScheme?: string | null;
@@ -167,19 +165,6 @@ export type ListAppsData = {
     useSsl: boolean;
     redirectHttps: boolean;
     appId: string;
-    /** @format date-time */
-    createdAt: string;
-    /** @format date-time */
-    updatedAt: string;
-  }[];
-  appPorts: {
-    id: string;
-    appId: string;
-    /**
-     * @min -9007199254740991
-     * @max 9007199254740991
-     */
-    port: number;
     /** @format date-time */
     createdAt: string;
     /** @format date-time */
@@ -242,6 +227,42 @@ export type ListAppsData = {
     /** @format date-time */
     updatedAt: string;
   }[];
+  appNetworkPolicy?: {
+    id: string;
+    appId: string;
+    allowInternetAccess: boolean;
+    /** @format date-time */
+    createdAt: string;
+    /** @format date-time */
+    updatedAt: string;
+    rules: {
+      id: string;
+      appNetworkPolicyId: string;
+      type: string;
+      targetAppId?: string | null;
+      targetAgentId?: string | null;
+      /**
+       * @min -9007199254740991
+       * @max 9007199254740991
+       */
+      port: number;
+      protocol: string;
+      /** @format date-time */
+      createdAt: string;
+      /** @format date-time */
+      updatedAt: string;
+      targetApp?: {
+        id: string;
+        name: string;
+        projectId: string;
+      } | null;
+      targetAgent?: {
+        id: string;
+        name: string;
+        projectId: string;
+      } | null;
+    }[];
+  } | null;
 }[];
 
 export type ListAppsError = {
@@ -283,8 +304,6 @@ export interface SaveAppPayload {
   cpuReservation?: number | null;
   cpuLimit?: number | null;
   webhookId?: string | null;
-  ingressNetworkPolicy: string;
-  egressNetworkPolicy: string;
   useNetworkPolicy: boolean;
   healthChechHttpGetPath?: string | null;
   healthCheckHttpScheme?: string | null;
@@ -306,6 +325,10 @@ export interface SaveAppPayload {
    */
   healthCheckFailureThreshold: number;
   healthCheckTcpPort?: number | null;
+  ingressNetworkPolicy?: any;
+  egressNetworkPolicy?: any;
+  networkPolicyMode?: any;
+  appPorts?: any;
   appDomains: {
     id?: string;
     hostname: string;
@@ -316,14 +339,6 @@ export interface SaveAppPayload {
     port: number;
     useSsl: boolean;
     redirectHttps: boolean;
-  }[];
-  appPorts: {
-    id?: string;
-    /**
-     * @min -9007199254740991
-     * @max 9007199254740991
-     */
-    port: number;
   }[];
   appNodePorts: {
     id?: string;
@@ -362,6 +377,22 @@ export interface SaveAppPayload {
     username: string;
     password: string;
   }[];
+  appNetworkPolicy: {
+    allowInternetAccess: boolean;
+    id?: string;
+    rules: {
+      type: string;
+      targetAppId?: string | null;
+      targetAgentId?: string | null;
+      /**
+       * @min -9007199254740991
+       * @max 9007199254740991
+       */
+      port: number;
+      protocol: string;
+      id?: string;
+    }[];
+  } | null;
 }
 
 export interface SaveAppData {
@@ -396,8 +427,6 @@ export interface SaveAppData {
   cpuReservation?: number | null;
   cpuLimit?: number | null;
   webhookId?: string | null;
-  ingressNetworkPolicy: string;
-  egressNetworkPolicy: string;
   useNetworkPolicy: boolean;
   healthChechHttpGetPath?: string | null;
   healthCheckHttpScheme?: string | null;
@@ -448,19 +477,6 @@ export interface SaveAppData {
     /** @format date-time */
     updatedAt: string;
   }[];
-  appPorts: {
-    id: string;
-    appId: string;
-    /**
-     * @min -9007199254740991
-     * @max 9007199254740991
-     */
-    port: number;
-    /** @format date-time */
-    createdAt: string;
-    /** @format date-time */
-    updatedAt: string;
-  }[];
   appNodePorts: {
     id: string;
     appId: string;
@@ -518,6 +534,42 @@ export interface SaveAppData {
     /** @format date-time */
     updatedAt: string;
   }[];
+  appNetworkPolicy?: {
+    id: string;
+    appId: string;
+    allowInternetAccess: boolean;
+    /** @format date-time */
+    createdAt: string;
+    /** @format date-time */
+    updatedAt: string;
+    rules: {
+      id: string;
+      appNetworkPolicyId: string;
+      type: string;
+      targetAppId?: string | null;
+      targetAgentId?: string | null;
+      /**
+       * @min -9007199254740991
+       * @max 9007199254740991
+       */
+      port: number;
+      protocol: string;
+      /** @format date-time */
+      createdAt: string;
+      /** @format date-time */
+      updatedAt: string;
+      targetApp?: {
+        id: string;
+        name: string;
+        projectId: string;
+      } | null;
+      targetAgent?: {
+        id: string;
+        name: string;
+        projectId: string;
+      } | null;
+    }[];
+  } | null;
 }
 
 export type SaveAppError = {
@@ -563,8 +615,6 @@ export interface GetAppData {
   cpuReservation?: number | null;
   cpuLimit?: number | null;
   webhookId?: string | null;
-  ingressNetworkPolicy: string;
-  egressNetworkPolicy: string;
   useNetworkPolicy: boolean;
   healthChechHttpGetPath?: string | null;
   healthCheckHttpScheme?: string | null;
@@ -610,19 +660,6 @@ export interface GetAppData {
     useSsl: boolean;
     redirectHttps: boolean;
     appId: string;
-    /** @format date-time */
-    createdAt: string;
-    /** @format date-time */
-    updatedAt: string;
-  }[];
-  appPorts: {
-    id: string;
-    appId: string;
-    /**
-     * @min -9007199254740991
-     * @max 9007199254740991
-     */
-    port: number;
     /** @format date-time */
     createdAt: string;
     /** @format date-time */
@@ -685,6 +722,42 @@ export interface GetAppData {
     /** @format date-time */
     updatedAt: string;
   }[];
+  appNetworkPolicy?: {
+    id: string;
+    appId: string;
+    allowInternetAccess: boolean;
+    /** @format date-time */
+    createdAt: string;
+    /** @format date-time */
+    updatedAt: string;
+    rules: {
+      id: string;
+      appNetworkPolicyId: string;
+      type: string;
+      targetAppId?: string | null;
+      targetAgentId?: string | null;
+      /**
+       * @min -9007199254740991
+       * @max 9007199254740991
+       */
+      port: number;
+      protocol: string;
+      /** @format date-time */
+      createdAt: string;
+      /** @format date-time */
+      updatedAt: string;
+      targetApp?: {
+        id: string;
+        name: string;
+        projectId: string;
+      } | null;
+      targetAgent?: {
+        id: string;
+        name: string;
+        projectId: string;
+      } | null;
+    }[];
+  } | null;
 }
 
 export type GetAppError = {
@@ -772,6 +845,27 @@ export type ListAgentsData = {
    * @max 9007199254740991
    */
   warmPoolReplicas: number;
+  deployFileBrowser: boolean;
+  healthChechHttpGetPath?: string | null;
+  healthCheckHttpScheme?: string | null;
+  healthCheckHttpHeadersJson?: string | null;
+  healthCheckHttpPort?: number | null;
+  /**
+   * @min -9007199254740991
+   * @max 9007199254740991
+   */
+  healthCheckPeriodSeconds: number;
+  /**
+   * @min -9007199254740991
+   * @max 9007199254740991
+   */
+  healthCheckTimeoutSeconds: number;
+  /**
+   * @min -9007199254740991
+   * @max 9007199254740991
+   */
+  healthCheckFailureThreshold: number;
+  healthCheckTcpPort?: number | null;
   /** @format date-time */
   createdAt: string;
   /** @format date-time */
@@ -915,6 +1009,27 @@ export interface SaveAgentPayload {
    * @max 9007199254740991
    */
   warmPoolReplicas: number;
+  deployFileBrowser: boolean;
+  healthChechHttpGetPath?: string | null;
+  healthCheckHttpScheme?: string | null;
+  healthCheckHttpHeadersJson?: string | null;
+  healthCheckHttpPort?: number | null;
+  /**
+   * @min -9007199254740991
+   * @max 9007199254740991
+   */
+  healthCheckPeriodSeconds: number;
+  /**
+   * @min -9007199254740991
+   * @max 9007199254740991
+   */
+  healthCheckTimeoutSeconds: number;
+  /**
+   * @min -9007199254740991
+   * @max 9007199254740991
+   */
+  healthCheckFailureThreshold: number;
+  healthCheckTcpPort?: number | null;
   agentDomains: {
     id?: string;
     hostname: string;
@@ -941,7 +1056,7 @@ export interface SaveAgentPayload {
     containerMountPath: string;
     content: string;
   }[];
-  agentNetworkPolicy?: {
+  agentNetworkPolicy: {
     id?: string;
     /** @default true */
     allowInternetAccess: boolean;
@@ -992,6 +1107,27 @@ export interface SaveAgentData {
    * @max 9007199254740991
    */
   warmPoolReplicas: number;
+  deployFileBrowser: boolean;
+  healthChechHttpGetPath?: string | null;
+  healthCheckHttpScheme?: string | null;
+  healthCheckHttpHeadersJson?: string | null;
+  healthCheckHttpPort?: number | null;
+  /**
+   * @min -9007199254740991
+   * @max 9007199254740991
+   */
+  healthCheckPeriodSeconds: number;
+  /**
+   * @min -9007199254740991
+   * @max 9007199254740991
+   */
+  healthCheckTimeoutSeconds: number;
+  /**
+   * @min -9007199254740991
+   * @max 9007199254740991
+   */
+  healthCheckFailureThreshold: number;
+  healthCheckTcpPort?: number | null;
   /** @format date-time */
   createdAt: string;
   /** @format date-time */
@@ -1139,6 +1275,27 @@ export interface GetAgentData {
    * @max 9007199254740991
    */
   warmPoolReplicas: number;
+  deployFileBrowser: boolean;
+  healthChechHttpGetPath?: string | null;
+  healthCheckHttpScheme?: string | null;
+  healthCheckHttpHeadersJson?: string | null;
+  healthCheckHttpPort?: number | null;
+  /**
+   * @min -9007199254740991
+   * @max 9007199254740991
+   */
+  healthCheckPeriodSeconds: number;
+  /**
+   * @min -9007199254740991
+   * @max 9007199254740991
+   */
+  healthCheckTimeoutSeconds: number;
+  /**
+   * @min -9007199254740991
+   * @max 9007199254740991
+   */
+  healthCheckFailureThreshold: number;
+  healthCheckTcpPort?: number | null;
   /** @format date-time */
   createdAt: string;
   /** @format date-time */
@@ -1556,6 +1713,7 @@ export type ListAppDeploymentsData = {
   gitCommitMessage?: string;
   deploymentId: string;
   buildMethod?: "RAILPACK" | "DOCKERFILE";
+  isRollback?: boolean;
   appId: string;
 }[];
 
@@ -1604,6 +1762,7 @@ export interface GetAppDeploymentData {
   gitCommitMessage?: string;
   deploymentId: string;
   buildMethod?: "RAILPACK" | "DOCKERFILE";
+  isRollback?: boolean;
   appId: string;
 }
 

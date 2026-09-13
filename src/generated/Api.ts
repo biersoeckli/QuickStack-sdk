@@ -460,7 +460,7 @@ export class QuickStackApi<
       ...params,
     });
   /**
-   * No description
+   * @description Run a shell command in a running Agent Sandbox. CLI harness templates stay alive with `sleep infinity`; invoke their documented launcher or bootstrap script here so it receives the Agent Runtime Secret and selected LiteLLM Model Alias.
    *
    * @tags Agent Sandboxes
    * @name RunAgentSandboxCommand
