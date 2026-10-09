@@ -109,12 +109,20 @@ export type ListAppsData = {
   gitUsername?: string | null;
   gitToken?: string | null;
   dockerfilePath: string;
+  framework?: string | null;
+  installCommand?: string | null;
+  buildCommand?: string | null;
+  runCommand?: string | null;
+  rootDirectory?: string | null;
+  outputDirectory?: string | null;
+  nodeVersion?: string | null;
   /**
    * @min -9007199254740991
    * @max 9007199254740991
    */
   replicas: number;
   envVars: string;
+  buildArgs: string;
   memoryReservation?: number | null;
   memoryLimit?: number | null;
   cpuReservation?: number | null;
@@ -293,12 +301,20 @@ export interface SaveAppPayload {
   gitUsername?: string | null;
   gitToken?: string | null;
   dockerfilePath: string;
+  framework?: string | null;
+  installCommand?: string | null;
+  buildCommand?: string | null;
+  runCommand?: string | null;
+  rootDirectory?: string | null;
+  outputDirectory?: string | null;
+  nodeVersion?: string | null;
   /**
    * @min -9007199254740991
    * @max 9007199254740991
    */
   replicas: number;
   envVars: string;
+  buildArgs: string;
   memoryReservation?: number | null;
   memoryLimit?: number | null;
   cpuReservation?: number | null;
@@ -416,12 +432,20 @@ export interface SaveAppData {
   gitUsername?: string | null;
   gitToken?: string | null;
   dockerfilePath: string;
+  framework?: string | null;
+  installCommand?: string | null;
+  buildCommand?: string | null;
+  runCommand?: string | null;
+  rootDirectory?: string | null;
+  outputDirectory?: string | null;
+  nodeVersion?: string | null;
   /**
    * @min -9007199254740991
    * @max 9007199254740991
    */
   replicas: number;
   envVars: string;
+  buildArgs: string;
   memoryReservation?: number | null;
   memoryLimit?: number | null;
   cpuReservation?: number | null;
@@ -604,12 +628,20 @@ export interface GetAppData {
   gitUsername?: string | null;
   gitToken?: string | null;
   dockerfilePath: string;
+  framework?: string | null;
+  installCommand?: string | null;
+  buildCommand?: string | null;
+  runCommand?: string | null;
+  rootDirectory?: string | null;
+  outputDirectory?: string | null;
+  nodeVersion?: string | null;
   /**
    * @min -9007199254740991
    * @max 9007199254740991
    */
   replicas: number;
   envVars: string;
+  buildArgs: string;
   memoryReservation?: number | null;
   memoryLimit?: number | null;
   cpuReservation?: number | null;
@@ -840,6 +872,7 @@ export type ListAgentsData = {
   containerCommand?: string | null;
   containerArgs?: string | null;
   workingDir?: string | null;
+  runtimeClassName?: string | null;
   /**
    * @min -9007199254740991
    * @max 9007199254740991
@@ -1004,6 +1037,7 @@ export interface SaveAgentPayload {
   containerCommand?: string | null;
   containerArgs?: string | null;
   workingDir?: string | null;
+  runtimeClassName?: string | null;
   /**
    * @min -9007199254740991
    * @max 9007199254740991
@@ -1102,6 +1136,7 @@ export interface SaveAgentData {
   containerCommand?: string | null;
   containerArgs?: string | null;
   workingDir?: string | null;
+  runtimeClassName?: string | null;
   /**
    * @min -9007199254740991
    * @max 9007199254740991
@@ -1270,6 +1305,7 @@ export interface GetAgentData {
   containerCommand?: string | null;
   containerArgs?: string | null;
   workingDir?: string | null;
+  runtimeClassName?: string | null;
   /**
    * @min -9007199254740991
    * @max 9007199254740991
@@ -1712,7 +1748,7 @@ export type ListAppDeploymentsData = {
   gitCommit?: string;
   gitCommitMessage?: string;
   deploymentId: string;
-  buildMethod?: "RAILPACK" | "DOCKERFILE";
+  buildMethod?: "RAILPACK" | "DOCKERFILE" | "FRAMEWORK";
   isRollback?: boolean;
   appId: string;
 }[];
@@ -1761,7 +1797,7 @@ export interface GetAppDeploymentData {
   gitCommit?: string;
   gitCommitMessage?: string;
   deploymentId: string;
-  buildMethod?: "RAILPACK" | "DOCKERFILE";
+  buildMethod?: "RAILPACK" | "DOCKERFILE" | "FRAMEWORK";
   isRollback?: boolean;
   appId: string;
 }
