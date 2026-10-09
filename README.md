@@ -77,6 +77,7 @@ const createdApp = await client.saveApp({
   dockerfilePath: "Dockerfile",
   replicas: 1,
   envVars: "{}",
+  buildArgs: "{}",
   ingressNetworkPolicy: "ALLOW_ALL",
   egressNetworkPolicy: "ALLOW_ALL",
   useNetworkPolicy: false,
@@ -89,6 +90,7 @@ const createdApp = await client.saveApp({
   appFileMounts: [],
   appVolumes: [],
   appBasicAuths: [],
+  appNetworkPolicy: null,
 });
 
 console.log("Created app id:", createdApp.id);
@@ -123,6 +125,7 @@ const updated = await client.saveApp({
   dockerfilePath: "Dockerfile",
   replicas: 2,
   envVars: "{}",
+  buildArgs: "{}",
   ingressNetworkPolicy: "ALLOW_ALL",
   egressNetworkPolicy: "ALLOW_ALL",
   useNetworkPolicy: false,
@@ -135,6 +138,7 @@ const updated = await client.saveApp({
   appFileMounts: [],
   appVolumes: [],
   appBasicAuths: [],
+  appNetworkPolicy: null,
 });
 
 console.log("Updated app:", updated.id);
