@@ -14,12 +14,18 @@ import {
   CheckAgentSandboxFileExistsData,
   CheckAgentSandboxFileExistsError,
   CheckAgentSandboxFileExistsParams,
+  CreateAgentSandboxApiTokenData,
+  CreateAgentSandboxApiTokenError,
+  CreateAgentSandboxApiTokenParams,
   DeleteAgentData,
   DeleteAgentError,
   DeleteAgentParams,
   DeleteAgentSandboxData,
   DeleteAgentSandboxError,
   DeleteAgentSandboxParams,
+  DeleteAgentTagData,
+  DeleteAgentTagError,
+  DeleteAgentTagParams,
   DeleteAppData,
   DeleteAppError,
   DeleteAppParams,
@@ -74,6 +80,13 @@ import {
   ListProjectsData,
   ListProjectsError,
   ReadAgentSandboxFileParams,
+  ResumeAgentSandboxByTagData,
+  ResumeAgentSandboxByTagError,
+  ResumeAgentSandboxByTagParams,
+  ResumeAgentSandboxByTagPayload,
+  ResumeAgentSandboxData,
+  ResumeAgentSandboxError,
+  ResumeAgentSandboxParams,
   RunAgentSandboxCommandData,
   RunAgentSandboxCommandError,
   RunAgentSandboxCommandParams,
@@ -91,6 +104,9 @@ import {
   StartAgentSandboxError,
   StartAgentSandboxParams,
   StartAgentSandboxPayload,
+  SuspendAgentSandboxData,
+  SuspendAgentSandboxError,
+  SuspendAgentSandboxParams,
   WriteAgentSandboxFileData,
   WriteAgentSandboxFileError,
   WriteAgentSandboxFileParams,
@@ -400,6 +416,69 @@ export class QuickStackApi<
       ...params,
     });
   /**
+   * @description Resume the suspended Agent Sandbox of this Agent that carries the given Custom Tag.
+   *
+   * @tags Agent Sandboxes
+   * @name ResumeAgentSandboxByTag
+   * @summary Resume agent sandbox by Custom Tag
+   * @request POST:/api/v1/agents/{agentId}/sandboxes/resume
+   * @secure
+   */
+  resumeAgentSandboxByTag = (
+    { agentId }: ResumeAgentSandboxByTagParams,
+    data: ResumeAgentSandboxByTagPayload,
+    params: RequestParams = {},
+  ) =>
+    this.request<ResumeAgentSandboxByTagData, ResumeAgentSandboxByTagError>({
+      path: `/api/v1/agents/${agentId}/sandboxes/resume`,
+      method: "POST",
+      body: data,
+      secure: true,
+      type: ContentType.Json,
+      format: "json",
+      ...params,
+    });
+  /**
+   * @description Release the compute of a running Agent Sandbox while keeping its volumes and identity.
+   *
+   * @tags Agent Sandboxes
+   * @name SuspendAgentSandbox
+   * @summary Suspend agent sandbox
+   * @request POST:/api/v1/agents/{agentId}/sandboxes/{sandboxName}/suspend
+   * @secure
+   */
+  suspendAgentSandbox = (
+    { agentId, sandboxName }: SuspendAgentSandboxParams,
+    params: RequestParams = {},
+  ) =>
+    this.request<SuspendAgentSandboxData, SuspendAgentSandboxError>({
+      path: `/api/v1/agents/${agentId}/sandboxes/${sandboxName}/suspend`,
+      method: "POST",
+      secure: true,
+      format: "json",
+      ...params,
+    });
+  /**
+   * @description Recreate the Pod of a suspended Agent Sandbox with its existing volumes mounted.
+   *
+   * @tags Agent Sandboxes
+   * @name ResumeAgentSandbox
+   * @summary Resume agent sandbox
+   * @request POST:/api/v1/agents/{agentId}/sandboxes/{sandboxName}/resume
+   * @secure
+   */
+  resumeAgentSandbox = (
+    { agentId, sandboxName }: ResumeAgentSandboxParams,
+    params: RequestParams = {},
+  ) =>
+    this.request<ResumeAgentSandboxData, ResumeAgentSandboxError>({
+      path: `/api/v1/agents/${agentId}/sandboxes/${sandboxName}/resume`,
+      method: "POST",
+      secure: true,
+      format: "json",
+      ...params,
+    });
+  /**
    * No description
    *
    * @tags Agent Sandboxes
@@ -455,6 +534,49 @@ export class QuickStackApi<
     this.request<GetAgentSandboxAccessUrlData, GetAgentSandboxAccessUrlError>({
       path: `/api/v1/agents/${agentId}/sandboxes/${sandboxName}/accessUrl/${domainId}`,
       method: "GET",
+      secure: true,
+      format: "json",
+      ...params,
+    });
+  /**
+   * @description Create a bearer token for direct API access to this Agent Sandbox through a configured domain. The token expires after 15 minutes.
+   *
+   * @tags Agent Sandboxes
+   * @name CreateAgentSandboxApiToken
+   * @summary Create agent sandbox API token
+   * @request POST:/api/v1/agents/{agentId}/sandboxes/{sandboxName}/apiToken/{domainId}
+   * @secure
+   */
+  createAgentSandboxApiToken = (
+    { agentId, sandboxName, domainId }: CreateAgentSandboxApiTokenParams,
+    params: RequestParams = {},
+  ) =>
+    this.request<
+      CreateAgentSandboxApiTokenData,
+      CreateAgentSandboxApiTokenError
+    >({
+      path: `/api/v1/agents/${agentId}/sandboxes/${sandboxName}/apiToken/${domainId}`,
+      method: "POST",
+      secure: true,
+      format: "json",
+      ...params,
+    });
+  /**
+   * @description Delete all stored data of one Custom Tag across the Agent's PER_CUSTOM_TAG volumes. Rejected while a sandbox with that tag exists.
+   *
+   * @tags Agent Sandboxes
+   * @name DeleteAgentTag
+   * @summary Delete Custom Tag data
+   * @request DELETE:/api/v1/agents/{agentId}/tags/{customTag}
+   * @secure
+   */
+  deleteAgentTag = (
+    { agentId, customTag }: DeleteAgentTagParams,
+    params: RequestParams = {},
+  ) =>
+    this.request<DeleteAgentTagData, DeleteAgentTagError>({
+      path: `/api/v1/agents/${agentId}/tags/${customTag}`,
+      method: "DELETE",
       secure: true,
       format: "json",
       ...params,

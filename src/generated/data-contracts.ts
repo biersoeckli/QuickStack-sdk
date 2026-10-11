@@ -13,7 +13,6 @@
 export type ListProjectsData = {
   id: string;
   name: string;
-  projectType: string;
   /** @format date-time */
   createdAt: string;
   /** @format date-time */
@@ -30,13 +29,11 @@ export type ListProjectsError = {
 export interface SaveProjectPayload {
   id?: string;
   name: string;
-  projectType: "APP" | "AGENT";
 }
 
 export interface SaveProjectData {
   id: string;
   name: string;
-  projectType: string;
   /** @format date-time */
   createdAt: string;
   /** @format date-time */
@@ -57,7 +54,6 @@ export interface GetProjectParams {
 export interface GetProjectData {
   id: string;
   name: string;
-  projectType: string;
   /** @format date-time */
   createdAt: string;
   /** @format date-time */
@@ -156,7 +152,6 @@ export type ListAppsData = {
   project: {
     id: string;
     name: string;
-    projectType: string;
     /** @format date-time */
     createdAt: string;
     /** @format date-time */
@@ -479,7 +474,6 @@ export interface SaveAppData {
   project: {
     id: string;
     name: string;
-    projectType: string;
     /** @format date-time */
     createdAt: string;
     /** @format date-time */
@@ -675,7 +669,6 @@ export interface GetAppData {
   project: {
     id: string;
     name: string;
-    projectType: string;
     /** @format date-time */
     createdAt: string;
     /** @format date-time */
@@ -867,7 +860,6 @@ export type ListAgentsData = {
   cpuLimit?: number | null;
   memoryRequest?: number | null;
   memoryLimit?: number | null;
-  systemPrompt?: string | null;
   encryptedEnvVars?: string | null;
   containerCommand?: string | null;
   containerArgs?: string | null;
@@ -906,7 +898,6 @@ export type ListAgentsData = {
   project: {
     id: string;
     name: string;
-    projectType: string;
     /** @format date-time */
     createdAt: string;
     /** @format date-time */
@@ -946,6 +937,8 @@ export type ListAgentsData = {
      * @max 9007199254740991
      */
     size: number;
+    volumeType: string;
+    accessMode: string;
     storageClassName: string;
     agentId: string;
     /** @format date-time */
@@ -1032,7 +1025,6 @@ export interface SaveAgentPayload {
   cpuLimit?: number | null;
   memoryRequest?: number | null;
   memoryLimit?: number | null;
-  systemPrompt?: string | null;
   encryptedEnvVars?: string | null;
   containerCommand?: string | null;
   containerArgs?: string | null;
@@ -1076,14 +1068,17 @@ export interface SaveAgentPayload {
     port: number;
   }[];
   agentVolumes: {
-    id?: string;
+    /** @minLength 1 */
     containerMountPath: string;
+    size: any;
     /**
-     * @min -9007199254740991
-     * @max 9007199254740991
+     * @minLength 1
+     * @default "longhorn"
      */
-    size: number;
     storageClassName: string;
+    volumeType?: string;
+    accessMode?: string;
+    id?: string;
   }[];
   agentFileMounts: {
     id?: string;
@@ -1131,7 +1126,6 @@ export interface SaveAgentData {
   cpuLimit?: number | null;
   memoryRequest?: number | null;
   memoryLimit?: number | null;
-  systemPrompt?: string | null;
   encryptedEnvVars?: string | null;
   containerCommand?: string | null;
   containerArgs?: string | null;
@@ -1170,7 +1164,6 @@ export interface SaveAgentData {
   project: {
     id: string;
     name: string;
-    projectType: string;
     /** @format date-time */
     createdAt: string;
     /** @format date-time */
@@ -1210,6 +1203,8 @@ export interface SaveAgentData {
      * @max 9007199254740991
      */
     size: number;
+    volumeType: string;
+    accessMode: string;
     storageClassName: string;
     agentId: string;
     /** @format date-time */
@@ -1300,7 +1295,6 @@ export interface GetAgentData {
   cpuLimit?: number | null;
   memoryRequest?: number | null;
   memoryLimit?: number | null;
-  systemPrompt?: string | null;
   encryptedEnvVars?: string | null;
   containerCommand?: string | null;
   containerArgs?: string | null;
@@ -1339,7 +1333,6 @@ export interface GetAgentData {
   project: {
     id: string;
     name: string;
-    projectType: string;
     /** @format date-time */
     createdAt: string;
     /** @format date-time */
@@ -1379,6 +1372,8 @@ export interface GetAgentData {
      * @max 9007199254740991
      */
     size: number;
+    volumeType: string;
+    accessMode: string;
     storageClassName: string;
     agentId: string;
     /** @format date-time */
@@ -1492,6 +1487,7 @@ export type ListAgentSandboxesData = {
     | "DEPLOYING"
     | "SHUTDOWN"
     | "SHUTTING_DOWN"
+    | "SUSPENDED"
     | "PENDING";
   customTag: string | null;
   createdAt: string | null;
@@ -1512,7 +1508,10 @@ export interface StartAgentSandboxPayload {
    * @max 1440
    */
   idleTimeoutMinutes?: number;
-  /** @minLength 1 */
+  /**
+   * @minLength 1
+   * @maxLength 63
+   */
   customTag?: string;
 }
 
@@ -1539,12 +1538,113 @@ export interface StartAgentSandboxData {
     | "DEPLOYING"
     | "SHUTDOWN"
     | "SHUTTING_DOWN"
+    | "SUSPENDED"
     | "PENDING";
   customTag: string | null;
   createdAt: string | null;
 }
 
 export type StartAgentSandboxError = {
+  type: string;
+  title: string;
+  status: number;
+  detail?: string;
+};
+
+export interface ResumeAgentSandboxByTagPayload {
+  /**
+   * @minLength 1
+   * @maxLength 63
+   */
+  customTag: string;
+}
+
+export interface ResumeAgentSandboxByTagParams {
+  agentId: string;
+}
+
+export interface ResumeAgentSandboxByTagData {
+  agentId: string;
+  sandboxName: string;
+  podName: string;
+  namespace: string;
+  status:
+    | "UNKNOWN"
+    | "BUILDING"
+    | "ERROR"
+    | "DEPLOYED"
+    | "DEPLOYING"
+    | "SHUTDOWN"
+    | "SHUTTING_DOWN"
+    | "SUSPENDED"
+    | "PENDING";
+  customTag: string | null;
+  createdAt: string | null;
+}
+
+export type ResumeAgentSandboxByTagError = {
+  type: string;
+  title: string;
+  status: number;
+  detail?: string;
+};
+
+export interface SuspendAgentSandboxParams {
+  agentId: string;
+  sandboxName: string;
+}
+
+export interface SuspendAgentSandboxData {
+  agentId: string;
+  sandboxName: string;
+  podName: string;
+  namespace: string;
+  status:
+    | "UNKNOWN"
+    | "BUILDING"
+    | "ERROR"
+    | "DEPLOYED"
+    | "DEPLOYING"
+    | "SHUTDOWN"
+    | "SHUTTING_DOWN"
+    | "SUSPENDED"
+    | "PENDING";
+  customTag: string | null;
+  createdAt: string | null;
+}
+
+export type SuspendAgentSandboxError = {
+  type: string;
+  title: string;
+  status: number;
+  detail?: string;
+};
+
+export interface ResumeAgentSandboxParams {
+  agentId: string;
+  sandboxName: string;
+}
+
+export interface ResumeAgentSandboxData {
+  agentId: string;
+  sandboxName: string;
+  podName: string;
+  namespace: string;
+  status:
+    | "UNKNOWN"
+    | "BUILDING"
+    | "ERROR"
+    | "DEPLOYED"
+    | "DEPLOYING"
+    | "SHUTDOWN"
+    | "SHUTTING_DOWN"
+    | "SUSPENDED"
+    | "PENDING";
+  customTag: string | null;
+  createdAt: string | null;
+}
+
+export type ResumeAgentSandboxError = {
   type: string;
   title: string;
   status: number;
@@ -1569,6 +1669,7 @@ export interface GetAgentSandboxData {
     | "DEPLOYING"
     | "SHUTDOWN"
     | "SHUTTING_DOWN"
+    | "SUSPENDED"
     | "PENDING";
   customTag: string | null;
   createdAt: string | null;
@@ -1611,6 +1712,47 @@ export interface GetAgentSandboxAccessUrlData {
 }
 
 export type GetAgentSandboxAccessUrlError = {
+  type: string;
+  title: string;
+  status: number;
+  detail?: string;
+};
+
+export interface CreateAgentSandboxApiTokenParams {
+  agentId: string;
+  sandboxName: string;
+  domainId: string;
+}
+
+export interface CreateAgentSandboxApiTokenData {
+  /** @minLength 1 */
+  token: string;
+  /**
+   * @exclusiveMin 0
+   * @max 9007199254740991
+   */
+  expiresAt: number;
+}
+
+export type CreateAgentSandboxApiTokenError = {
+  type: string;
+  title: string;
+  status: number;
+  detail?: string;
+};
+
+export interface DeleteAgentTagParams {
+  agentId: string;
+  /**
+   * @minLength 1
+   * @maxLength 63
+   */
+  customTag: string;
+}
+
+export type DeleteAgentTagData = any;
+
+export type DeleteAgentTagError = {
   type: string;
   title: string;
   status: number;
@@ -1744,6 +1886,7 @@ export type ListAppDeploymentsData = {
     | "DEPLOYING"
     | "SHUTDOWN"
     | "SHUTTING_DOWN"
+    | "SUSPENDED"
     | "PENDING";
   gitCommit?: string;
   gitCommitMessage?: string;
@@ -1793,6 +1936,7 @@ export interface GetAppDeploymentData {
     | "DEPLOYING"
     | "SHUTDOWN"
     | "SHUTTING_DOWN"
+    | "SUSPENDED"
     | "PENDING";
   gitCommit?: string;
   gitCommitMessage?: string;
