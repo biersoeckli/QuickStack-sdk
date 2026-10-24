@@ -91,6 +91,10 @@ import {
   RunAgentSandboxCommandError,
   RunAgentSandboxCommandParams,
   RunAgentSandboxCommandPayload,
+  RunAppCommandData,
+  RunAppCommandError,
+  RunAppCommandParams,
+  RunAppCommandPayload,
   SaveAgentData,
   SaveAgentError,
   SaveAgentPayload,
@@ -259,6 +263,29 @@ export class QuickStackApi<
       method: "GET",
       query: query,
       secure: true,
+      format: "json",
+      ...params,
+    });
+  /**
+   * @description Run a shell command in the first running Pod of this app. Requires write access to the app.
+   *
+   * @tags Apps
+   * @name RunAppCommand
+   * @summary Run command in app
+   * @request POST:/api/v1/apps/{appId}/commands
+   * @secure
+   */
+  runAppCommand = (
+    { appId }: RunAppCommandParams,
+    data: RunAppCommandPayload,
+    params: RequestParams = {},
+  ) =>
+    this.request<RunAppCommandData, RunAppCommandError>({
+      path: `/api/v1/apps/${appId}/commands`,
+      method: "POST",
+      body: data,
+      secure: true,
+      type: ContentType.Json,
       format: "json",
       ...params,
     });

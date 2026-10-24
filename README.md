@@ -151,6 +151,31 @@ await client.deleteApp({ id: "app-id" });
 console.log("App deleted");
 ```
 
+## Execute Commands in an App Workload
+
+Run a shell command in the first running Pod of an app. The caller needs write access to the app, and the app must have a running workload.
+
+```ts
+import { QuickStackClient } from "@quickstackdev/sdk";
+
+const client = QuickStackClient.create();
+
+const result = await client.runAppCommand(
+  { appId: "app-id" },
+  {
+    command: "node --version",
+    cwd: "/app",
+    timeoutSec: 30,
+    env: { NODE_ENV: "production" },
+  },
+);
+
+console.log("Command output:", result.stdout);
+console.log("Exit code:", result.exitCode);
+```
+
+`runAppCommand` returns `stdout`, `stderr`, and `exitCode`. A non-zero exit code is returned in the result and does not automatically throw an error.
+
 ## Error Handling Pattern
 
 ```ts

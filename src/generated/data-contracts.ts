@@ -823,6 +823,41 @@ export type GetAppLogsError = {
   detail?: string;
 };
 
+export interface RunAppCommandPayload {
+  /** @minLength 1 */
+  command: string;
+  /** @minLength 1 */
+  cwd?: string;
+  /**
+   * @exclusiveMin 0
+   * @max 3600
+   * @default 120
+   */
+  timeoutSec?: number;
+  env?: Partial<Record<string, string>>;
+}
+
+export interface RunAppCommandParams {
+  appId: string;
+}
+
+export interface RunAppCommandData {
+  stdout: string;
+  stderr: string;
+  /**
+   * @min -9007199254740991
+   * @max 9007199254740991
+   */
+  exitCode: number;
+}
+
+export type RunAppCommandError = {
+  type: string;
+  title: string;
+  status: number;
+  detail?: string;
+};
+
 export interface DeleteAppParams {
   id: string;
 }
