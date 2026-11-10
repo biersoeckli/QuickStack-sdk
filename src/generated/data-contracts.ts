@@ -10,20 +10,48 @@
  * ---------------------------------------------------------------
  */
 
-export type ListProjectsData = {
-  id: string;
-  name: string;
-  /** @format date-time */
-  createdAt: string;
-  /** @format date-time */
-  updatedAt: string;
-}[];
+export interface ListProjectsParams {
+  /**
+   * Maximum number of items to return (1-100, default 50).
+   * @min 1
+   * @max 100
+   */
+  limit?: number;
+  /** Opaque continuation cursor from a previous response. Send it together with limit. */
+  cursor?: string;
+}
+
+export interface ListProjectsData {
+  items: {
+    id: string;
+    name: string;
+    /** @format date-time */
+    createdAt: string;
+    /** @format date-time */
+    updatedAt: string;
+  }[];
+  /**
+   * @min -9007199254740991
+   * @max 9007199254740991
+   */
+  total: number;
+  /**
+   * @min -9007199254740991
+   * @max 9007199254740991
+   */
+  limit: number;
+  nextCursor: string | null;
+}
 
 export type ListProjectsError = {
   type: string;
   title: string;
   status: number;
   detail?: string;
+  errors?: {
+    path: string;
+    message: string;
+  }[];
 };
 
 export interface SaveProjectPayload {
@@ -45,6 +73,10 @@ export type SaveProjectError = {
   title: string;
   status: number;
   detail?: string;
+  errors?: {
+    path: string;
+    message: string;
+  }[];
 };
 
 export interface GetProjectParams {
@@ -65,6 +97,10 @@ export type GetProjectError = {
   title: string;
   status: number;
   detail?: string;
+  errors?: {
+    path: string;
+    message: string;
+  }[];
 };
 
 export interface DeleteProjectParams {
@@ -78,201 +114,230 @@ export type DeleteProjectError = {
   title: string;
   status: number;
   detail?: string;
+  errors?: {
+    path: string;
+    message: string;
+  }[];
 };
 
 export interface ListAppsParams {
+  /**
+   * Maximum number of items to return (1-100, default 50).
+   * @min 1
+   * @max 100
+   */
+  limit?: number;
+  /** Opaque continuation cursor from a previous response. Send it together with limit. */
+  cursor?: string;
   projectId?: string;
 }
 
-export type ListAppsData = {
-  id: string;
-  name: string;
-  appType: string;
-  projectId: string;
-  sourceType: string;
-  buildMethod: string;
-  containerImageSource?: string | null;
-  containerRegistryUsername?: string | null;
-  containerRegistryPassword?: string | null;
-  containerCommand?: string | null;
-  containerArgs?: string | null;
-  securityContextRunAsUser?: number | null;
-  securityContextRunAsGroup?: number | null;
-  securityContextFsGroup?: number | null;
-  securityContextPrivileged?: boolean | null;
-  gitUrl?: string | null;
-  gitBranch?: string | null;
-  gitUsername?: string | null;
-  gitToken?: string | null;
-  dockerfilePath: string;
-  framework?: string | null;
-  installCommand?: string | null;
-  buildCommand?: string | null;
-  runCommand?: string | null;
-  rootDirectory?: string | null;
-  outputDirectory?: string | null;
-  nodeVersion?: string | null;
-  /**
-   * @min -9007199254740991
-   * @max 9007199254740991
-   */
-  replicas: number;
-  envVars: string;
-  buildArgs: string;
-  memoryReservation?: number | null;
-  memoryLimit?: number | null;
-  cpuReservation?: number | null;
-  cpuLimit?: number | null;
-  webhookId?: string | null;
-  useNetworkPolicy: boolean;
-  healthChechHttpGetPath?: string | null;
-  healthCheckHttpScheme?: string | null;
-  healthCheckHttpHeadersJson?: string | null;
-  healthCheckHttpPort?: number | null;
-  /**
-   * @min -9007199254740991
-   * @max 9007199254740991
-   */
-  healthCheckPeriodSeconds: number;
-  /**
-   * @min -9007199254740991
-   * @max 9007199254740991
-   */
-  healthCheckTimeoutSeconds: number;
-  /**
-   * @min -9007199254740991
-   * @max 9007199254740991
-   */
-  healthCheckFailureThreshold: number;
-  healthCheckTcpPort?: number | null;
-  /** @format date-time */
-  createdAt: string;
-  /** @format date-time */
-  updatedAt: string;
-  project: {
+export interface ListAppsData {
+  items: {
     id: string;
     name: string;
-    /** @format date-time */
-    createdAt: string;
-    /** @format date-time */
-    updatedAt: string;
-  };
-  appDomains: {
-    id: string;
-    hostname: string;
+    appType: string;
+    projectId: string;
+    sourceType: string;
+    buildMethod: string;
+    containerImageSource?: string | null;
+    containerRegistryUsername?: string | null;
+    containerRegistryPassword?: string | null;
+    containerCommand?: string | null;
+    containerArgs?: string | null;
+    securityContextRunAsUser?: number | null;
+    securityContextRunAsGroup?: number | null;
+    securityContextFsGroup?: number | null;
+    securityContextPrivileged?: boolean | null;
+    gitUrl?: string | null;
+    gitBranch?: string | null;
+    gitUsername?: string | null;
+    gitToken?: string | null;
+    dockerfilePath: string;
+    framework?: string | null;
+    installCommand?: string | null;
+    buildCommand?: string | null;
+    runCommand?: string | null;
+    rootDirectory?: string | null;
+    outputDirectory?: string | null;
+    nodeVersion?: string | null;
     /**
      * @min -9007199254740991
      * @max 9007199254740991
      */
-    port: number;
-    useSsl: boolean;
-    redirectHttps: boolean;
-    appId: string;
-    /** @format date-time */
-    createdAt: string;
-    /** @format date-time */
-    updatedAt: string;
-  }[];
-  appNodePorts: {
-    id: string;
-    appId: string;
+    replicas: number;
+    envVars: string;
+    buildArgs: string;
+    memoryReservation?: number | null;
+    memoryLimit?: number | null;
+    cpuReservation?: number | null;
+    cpuLimit?: number | null;
+    webhookId?: string | null;
+    useNetworkPolicy: boolean;
+    healthChechHttpGetPath?: string | null;
+    healthCheckHttpScheme?: string | null;
+    healthCheckHttpHeadersJson?: string | null;
+    healthCheckHttpPort?: number | null;
     /**
      * @min -9007199254740991
      * @max 9007199254740991
      */
-    port: number;
+    healthCheckPeriodSeconds: number;
     /**
      * @min -9007199254740991
      * @max 9007199254740991
      */
-    nodePort: number;
-    protocol: string;
-    /** @format date-time */
-    createdAt: string;
-    /** @format date-time */
-    updatedAt: string;
-  }[];
-  appFileMounts: {
-    id: string;
-    containerMountPath: string;
-    content: string;
-    appId: string;
-    /** @format date-time */
-    createdAt: string;
-    /** @format date-time */
-    updatedAt: string;
-  }[];
-  appVolumes: {
-    id: string;
-    containerMountPath: string;
+    healthCheckTimeoutSeconds: number;
     /**
      * @min -9007199254740991
      * @max 9007199254740991
      */
-    size: number;
-    accessMode: string;
-    storageClassName: string;
-    shareWithOtherApps: boolean;
-    sharedVolumeId?: string | null;
-    appId: string;
+    healthCheckFailureThreshold: number;
+    healthCheckTcpPort?: number | null;
     /** @format date-time */
     createdAt: string;
     /** @format date-time */
     updatedAt: string;
-  }[];
-  appBasicAuths: {
-    id: string;
-    username: string;
-    password: string;
-    appId: string;
-    /** @format date-time */
-    createdAt: string;
-    /** @format date-time */
-    updatedAt: string;
-  }[];
-  appNetworkPolicy?: {
-    id: string;
-    appId: string;
-    allowInternetAccess: boolean;
-    /** @format date-time */
-    createdAt: string;
-    /** @format date-time */
-    updatedAt: string;
-    rules: {
+    project: {
       id: string;
-      appNetworkPolicyId: string;
-      type: string;
-      targetAppId?: string | null;
-      targetAgentId?: string | null;
+      name: string;
+      /** @format date-time */
+      createdAt: string;
+      /** @format date-time */
+      updatedAt: string;
+    };
+    appDomains: {
+      id: string;
+      hostname: string;
       /**
        * @min -9007199254740991
        * @max 9007199254740991
        */
       port: number;
+      useSsl: boolean;
+      redirectHttps: boolean;
+      appId: string;
+      /** @format date-time */
+      createdAt: string;
+      /** @format date-time */
+      updatedAt: string;
+    }[];
+    appNodePorts: {
+      id: string;
+      appId: string;
+      /**
+       * @min -9007199254740991
+       * @max 9007199254740991
+       */
+      port: number;
+      /**
+       * @min -9007199254740991
+       * @max 9007199254740991
+       */
+      nodePort: number;
       protocol: string;
       /** @format date-time */
       createdAt: string;
       /** @format date-time */
       updatedAt: string;
-      targetApp?: {
-        id: string;
-        name: string;
-        projectId: string;
-      } | null;
-      targetAgent?: {
-        id: string;
-        name: string;
-        projectId: string;
-      } | null;
     }[];
-  } | null;
-}[];
+    appFileMounts: {
+      id: string;
+      containerMountPath: string;
+      content: string;
+      appId: string;
+      /** @format date-time */
+      createdAt: string;
+      /** @format date-time */
+      updatedAt: string;
+    }[];
+    appVolumes: {
+      id: string;
+      containerMountPath: string;
+      /**
+       * @min -9007199254740991
+       * @max 9007199254740991
+       */
+      size: number;
+      accessMode: string;
+      storageClassName: string;
+      shareWithOtherApps: boolean;
+      sharedVolumeId?: string | null;
+      appId: string;
+      /** @format date-time */
+      createdAt: string;
+      /** @format date-time */
+      updatedAt: string;
+    }[];
+    appBasicAuths: {
+      id: string;
+      username: string;
+      password: string;
+      appId: string;
+      /** @format date-time */
+      createdAt: string;
+      /** @format date-time */
+      updatedAt: string;
+    }[];
+    appNetworkPolicy?: {
+      id: string;
+      appId: string;
+      allowInternetAccess: boolean;
+      /** @format date-time */
+      createdAt: string;
+      /** @format date-time */
+      updatedAt: string;
+      rules: {
+        id: string;
+        appNetworkPolicyId: string;
+        type: string;
+        targetAppId?: string | null;
+        targetAgentId?: string | null;
+        /**
+         * @min -9007199254740991
+         * @max 9007199254740991
+         */
+        port: number;
+        protocol: string;
+        /** @format date-time */
+        createdAt: string;
+        /** @format date-time */
+        updatedAt: string;
+        targetApp?: {
+          id: string;
+          name: string;
+          projectId: string;
+        } | null;
+        targetAgent?: {
+          id: string;
+          name: string;
+          projectId: string;
+        } | null;
+      }[];
+    } | null;
+  }[];
+  /**
+   * @min -9007199254740991
+   * @max 9007199254740991
+   */
+  total: number;
+  /**
+   * @min -9007199254740991
+   * @max 9007199254740991
+   */
+  limit: number;
+  nextCursor: string | null;
+}
 
 export type ListAppsError = {
   type: string;
   title: string;
   status: number;
   detail?: string;
+  errors?: {
+    path: string;
+    message: string;
+  }[];
 };
 
 export interface SaveAppPayload {
@@ -595,6 +660,10 @@ export type SaveAppError = {
   title: string;
   status: number;
   detail?: string;
+  errors?: {
+    path: string;
+    message: string;
+  }[];
 };
 
 export interface GetAppParams {
@@ -790,6 +859,10 @@ export type GetAppError = {
   title: string;
   status: number;
   detail?: string;
+  errors?: {
+    path: string;
+    message: string;
+  }[];
 };
 
 export interface GetAppLogsParams {
@@ -821,6 +894,10 @@ export type GetAppLogsError = {
   title: string;
   status: number;
   detail?: string;
+  errors?: {
+    path: string;
+    message: string;
+  }[];
 };
 
 export interface RunAppCommandPayload {
@@ -856,6 +933,10 @@ export type RunAppCommandError = {
   title: string;
   status: number;
   detail?: string;
+  errors?: {
+    path: string;
+    message: string;
+  }[];
 };
 
 export interface DeleteAppParams {
@@ -869,175 +950,204 @@ export type DeleteAppError = {
   title: string;
   status: number;
   detail?: string;
+  errors?: {
+    path: string;
+    message: string;
+  }[];
 };
 
 export interface ListAgentsParams {
+  /**
+   * Maximum number of items to return (1-100, default 50).
+   * @min 1
+   * @max 100
+   */
+  limit?: number;
+  /** Opaque continuation cursor from a previous response. Send it together with limit. */
+  cursor?: string;
   projectId?: string;
 }
 
-export type ListAgentsData = {
-  id: string;
-  name: string;
-  projectId: string;
-  llmGatewayId: string;
-  modelAlias: string[];
-  sourceType: string;
-  buildMethod: string;
-  containerImageSource?: string | null;
-  containerRegistryUsername?: string | null;
-  containerRegistryPassword?: string | null;
-  gitUrl?: string | null;
-  gitBranch?: string | null;
-  gitUsername?: string | null;
-  gitToken?: string | null;
-  dockerfilePath: string;
-  cpuRequest?: number | null;
-  cpuLimit?: number | null;
-  memoryRequest?: number | null;
-  memoryLimit?: number | null;
-  encryptedEnvVars?: string | null;
-  containerCommand?: string | null;
-  containerArgs?: string | null;
-  workingDir?: string | null;
-  runtimeClassName?: string | null;
-  /**
-   * @min -9007199254740991
-   * @max 9007199254740991
-   */
-  warmPoolReplicas: number;
-  deployFileBrowser: boolean;
-  healthChechHttpGetPath?: string | null;
-  healthCheckHttpScheme?: string | null;
-  healthCheckHttpHeadersJson?: string | null;
-  healthCheckHttpPort?: number | null;
-  /**
-   * @min -9007199254740991
-   * @max 9007199254740991
-   */
-  healthCheckPeriodSeconds: number;
-  /**
-   * @min -9007199254740991
-   * @max 9007199254740991
-   */
-  healthCheckTimeoutSeconds: number;
-  /**
-   * @min -9007199254740991
-   * @max 9007199254740991
-   */
-  healthCheckFailureThreshold: number;
-  healthCheckTcpPort?: number | null;
-  /** @format date-time */
-  createdAt: string;
-  /** @format date-time */
-  updatedAt: string;
-  project: {
+export interface ListAgentsData {
+  items: {
     id: string;
     name: string;
-    /** @format date-time */
-    createdAt: string;
-    /** @format date-time */
-    updatedAt: string;
-  };
-  llmGateway: {
-    id: string;
-    name: string;
-    baseUrl: string;
-    encryptedAdminKey: string;
-    /** @format date-time */
-    createdAt: string;
-    /** @format date-time */
-    updatedAt: string;
-  };
-  agentDomains: {
-    id: string;
-    hostname: string;
-    useSsl: boolean;
-    redirectHttps: boolean;
+    projectId: string;
+    llmGatewayId: string;
+    modelAlias: string[];
+    sourceType: string;
+    buildMethod: string;
+    containerImageSource?: string | null;
+    containerRegistryUsername?: string | null;
+    containerRegistryPassword?: string | null;
+    gitUrl?: string | null;
+    gitBranch?: string | null;
+    gitUsername?: string | null;
+    gitToken?: string | null;
+    dockerfilePath: string;
+    cpuRequest?: number | null;
+    cpuLimit?: number | null;
+    memoryRequest?: number | null;
+    memoryLimit?: number | null;
+    encryptedEnvVars?: string | null;
+    containerCommand?: string | null;
+    containerArgs?: string | null;
+    workingDir?: string | null;
+    runtimeClassName?: string | null;
     /**
      * @min -9007199254740991
      * @max 9007199254740991
      */
-    port: number;
-    agentId: string;
-    /** @format date-time */
-    createdAt: string;
-    /** @format date-time */
-    updatedAt: string;
-  }[];
-  agentVolumes: {
-    id: string;
-    containerMountPath: string;
+    warmPoolReplicas: number;
+    deployFileBrowser: boolean;
+    healthChechHttpGetPath?: string | null;
+    healthCheckHttpScheme?: string | null;
+    healthCheckHttpHeadersJson?: string | null;
+    healthCheckHttpPort?: number | null;
     /**
      * @min -9007199254740991
      * @max 9007199254740991
      */
-    size: number;
-    volumeType: string;
-    accessMode: string;
-    storageClassName: string;
-    agentId: string;
+    healthCheckPeriodSeconds: number;
+    /**
+     * @min -9007199254740991
+     * @max 9007199254740991
+     */
+    healthCheckTimeoutSeconds: number;
+    /**
+     * @min -9007199254740991
+     * @max 9007199254740991
+     */
+    healthCheckFailureThreshold: number;
+    healthCheckTcpPort?: number | null;
     /** @format date-time */
     createdAt: string;
     /** @format date-time */
     updatedAt: string;
-  }[];
-  agentFileMounts: {
-    id: string;
-    containerMountPath: string;
-    content: string;
-    agentId: string;
-    /** @format date-time */
-    createdAt: string;
-    /** @format date-time */
-    updatedAt: string;
-  }[];
-  agentGitSshKey?: {
-    id: string;
-    agentId: string;
-    publicKey: string;
-    encryptedPrivateKey: string;
-    /** @format date-time */
-    createdAt: string;
-    /** @format date-time */
-    updatedAt: string;
-  } | null;
-  agentNetworkPolicy?: {
-    id: string;
-    agentId: string;
-    allowInternetAccess: boolean;
-    /** @format date-time */
-    createdAt: string;
-    /** @format date-time */
-    updatedAt: string;
-    rules: {
+    project: {
       id: string;
-      agentNetworkPolicyId: string;
-      type: string;
-      targetAppId: string;
+      name: string;
+      /** @format date-time */
+      createdAt: string;
+      /** @format date-time */
+      updatedAt: string;
+    };
+    llmGateway: {
+      id: string;
+      name: string;
+      baseUrl: string;
+      encryptedAdminKey: string;
+      /** @format date-time */
+      createdAt: string;
+      /** @format date-time */
+      updatedAt: string;
+    };
+    agentDomains: {
+      id: string;
+      hostname: string;
+      useSsl: boolean;
+      redirectHttps: boolean;
       /**
        * @min -9007199254740991
        * @max 9007199254740991
        */
       port: number;
-      protocol: string;
+      agentId: string;
       /** @format date-time */
       createdAt: string;
       /** @format date-time */
       updatedAt: string;
-      targetApp: {
-        id: string;
-        name: string;
-        projectId: string;
-      };
     }[];
-  } | null;
-}[];
+    agentVolumes: {
+      id: string;
+      containerMountPath: string;
+      /**
+       * @min -9007199254740991
+       * @max 9007199254740991
+       */
+      size: number;
+      volumeType: string;
+      accessMode: string;
+      storageClassName: string;
+      agentId: string;
+      /** @format date-time */
+      createdAt: string;
+      /** @format date-time */
+      updatedAt: string;
+    }[];
+    agentFileMounts: {
+      id: string;
+      containerMountPath: string;
+      content: string;
+      agentId: string;
+      /** @format date-time */
+      createdAt: string;
+      /** @format date-time */
+      updatedAt: string;
+    }[];
+    agentGitSshKey?: {
+      id: string;
+      agentId: string;
+      publicKey: string;
+      encryptedPrivateKey: string;
+      /** @format date-time */
+      createdAt: string;
+      /** @format date-time */
+      updatedAt: string;
+    } | null;
+    agentNetworkPolicy?: {
+      id: string;
+      agentId: string;
+      allowInternetAccess: boolean;
+      /** @format date-time */
+      createdAt: string;
+      /** @format date-time */
+      updatedAt: string;
+      rules: {
+        id: string;
+        agentNetworkPolicyId: string;
+        type: string;
+        targetAppId: string;
+        /**
+         * @min -9007199254740991
+         * @max 9007199254740991
+         */
+        port: number;
+        protocol: string;
+        /** @format date-time */
+        createdAt: string;
+        /** @format date-time */
+        updatedAt: string;
+        targetApp: {
+          id: string;
+          name: string;
+          projectId: string;
+        };
+      }[];
+    } | null;
+  }[];
+  /**
+   * @min -9007199254740991
+   * @max 9007199254740991
+   */
+  total: number;
+  /**
+   * @min -9007199254740991
+   * @max 9007199254740991
+   */
+  limit: number;
+  nextCursor: string | null;
+}
 
 export type ListAgentsError = {
   type: string;
   title: string;
   status: number;
   detail?: string;
+  errors?: {
+    path: string;
+    message: string;
+  }[];
 };
 
 export interface SaveAgentPayload {
@@ -1304,6 +1414,10 @@ export type SaveAgentError = {
   title: string;
   status: number;
   detail?: string;
+  errors?: {
+    path: string;
+    message: string;
+  }[];
 };
 
 export interface GetAgentParams {
@@ -1473,6 +1587,10 @@ export type GetAgentError = {
   title: string;
   status: number;
   detail?: string;
+  errors?: {
+    path: string;
+    message: string;
+  }[];
 };
 
 export interface DeleteAgentParams {
@@ -1486,6 +1604,10 @@ export type DeleteAgentError = {
   title: string;
   status: number;
   detail?: string;
+  errors?: {
+    path: string;
+    message: string;
+  }[];
 };
 
 export interface DeployAgentParams {
@@ -1503,36 +1625,65 @@ export type DeployAgentError = {
   title: string;
   status: number;
   detail?: string;
+  errors?: {
+    path: string;
+    message: string;
+  }[];
 };
 
 export interface ListAgentSandboxesParams {
+  /**
+   * Maximum number of items to return (1-100, default 50).
+   * @min 1
+   * @max 100
+   */
+  limit?: number;
+  /** Opaque continuation cursor from a previous response. Send it together with limit. */
+  cursor?: string;
   agentId: string;
 }
 
-export type ListAgentSandboxesData = {
-  agentId: string;
-  sandboxName: string;
-  podName: string;
-  namespace: string;
-  status:
-    | "UNKNOWN"
-    | "BUILDING"
-    | "ERROR"
-    | "DEPLOYED"
-    | "DEPLOYING"
-    | "SHUTDOWN"
-    | "SHUTTING_DOWN"
-    | "SUSPENDED"
-    | "PENDING";
-  customTag: string | null;
-  createdAt: string | null;
-}[];
+export interface ListAgentSandboxesData {
+  items: {
+    agentId: string;
+    sandboxName: string;
+    podName: string;
+    namespace: string;
+    status:
+      | "UNKNOWN"
+      | "BUILDING"
+      | "ERROR"
+      | "DEPLOYED"
+      | "DEPLOYING"
+      | "SHUTDOWN"
+      | "SHUTTING_DOWN"
+      | "SUSPENDED"
+      | "PENDING";
+    customTag: string | null;
+    createdAt: string | null;
+  }[];
+  /**
+   * @min -9007199254740991
+   * @max 9007199254740991
+   */
+  total: number;
+  /**
+   * @min -9007199254740991
+   * @max 9007199254740991
+   */
+  limit: number;
+  nextCursor: string | null;
+}
 
 export type ListAgentSandboxesError = {
   type: string;
   title: string;
   status: number;
   detail?: string;
+  errors?: {
+    path: string;
+    message: string;
+  }[];
 };
 
 /** @default {} */
@@ -1584,6 +1735,10 @@ export type StartAgentSandboxError = {
   title: string;
   status: number;
   detail?: string;
+  errors?: {
+    path: string;
+    message: string;
+  }[];
 };
 
 export interface ResumeAgentSandboxByTagPayload {
@@ -1622,6 +1777,10 @@ export type ResumeAgentSandboxByTagError = {
   title: string;
   status: number;
   detail?: string;
+  errors?: {
+    path: string;
+    message: string;
+  }[];
 };
 
 export interface SuspendAgentSandboxParams {
@@ -1653,6 +1812,10 @@ export type SuspendAgentSandboxError = {
   title: string;
   status: number;
   detail?: string;
+  errors?: {
+    path: string;
+    message: string;
+  }[];
 };
 
 export interface ResumeAgentSandboxParams {
@@ -1684,6 +1847,10 @@ export type ResumeAgentSandboxError = {
   title: string;
   status: number;
   detail?: string;
+  errors?: {
+    path: string;
+    message: string;
+  }[];
 };
 
 export interface GetAgentSandboxParams {
@@ -1715,6 +1882,10 @@ export type GetAgentSandboxError = {
   title: string;
   status: number;
   detail?: string;
+  errors?: {
+    path: string;
+    message: string;
+  }[];
 };
 
 export interface DeleteAgentSandboxParams {
@@ -1729,6 +1900,10 @@ export type DeleteAgentSandboxError = {
   title: string;
   status: number;
   detail?: string;
+  errors?: {
+    path: string;
+    message: string;
+  }[];
 };
 
 export interface GetAgentSandboxAccessUrlParams {
@@ -1751,6 +1926,10 @@ export type GetAgentSandboxAccessUrlError = {
   title: string;
   status: number;
   detail?: string;
+  errors?: {
+    path: string;
+    message: string;
+  }[];
 };
 
 export interface CreateAgentSandboxApiTokenParams {
@@ -1774,6 +1953,10 @@ export type CreateAgentSandboxApiTokenError = {
   title: string;
   status: number;
   detail?: string;
+  errors?: {
+    path: string;
+    message: string;
+  }[];
 };
 
 export interface DeleteAgentTagParams {
@@ -1792,6 +1975,10 @@ export type DeleteAgentTagError = {
   title: string;
   status: number;
   detail?: string;
+  errors?: {
+    path: string;
+    message: string;
+  }[];
 };
 
 export interface RunAgentSandboxCommandPayload {
@@ -1828,6 +2015,10 @@ export type RunAgentSandboxCommandError = {
   title: string;
   status: number;
   detail?: string;
+  errors?: {
+    path: string;
+    message: string;
+  }[];
 };
 
 export interface ReadAgentSandboxFileParams {
@@ -1856,36 +2047,65 @@ export type WriteAgentSandboxFileError = {
   title: string;
   status: number;
   detail?: string;
+  errors?: {
+    path: string;
+    message: string;
+  }[];
 };
 
 export interface ListAgentSandboxFilesParams {
   /** @minLength 1 */
   path: string;
+  /**
+   * Maximum number of items to return (1-100, default 50).
+   * @min 1
+   * @max 100
+   */
+  limit?: number;
+  /** Opaque continuation cursor from a previous response. Send it together with limit. */
+  cursor?: string;
   agentId: string;
   sandboxName: string;
 }
 
-export type ListAgentSandboxFilesData = {
-  name: string;
-  path: string;
-  type: "file" | "directory" | "other";
+export interface ListAgentSandboxFilesData {
+  items: {
+    name: string;
+    path: string;
+    type: "file" | "directory" | "other";
+    /**
+     * @min 0
+     * @max 9007199254740991
+     */
+    size?: number;
+    /**
+     * @format date-time
+     * @pattern ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
+     */
+    modifiedAt?: string;
+  }[];
   /**
-   * @min 0
+   * @min -9007199254740991
    * @max 9007199254740991
    */
-  size?: number;
+  total: number;
   /**
-   * @format date-time
-   * @pattern ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
+   * @min -9007199254740991
+   * @max 9007199254740991
    */
-  modifiedAt?: string;
-}[];
+  limit: number;
+  nextCursor: string | null;
+}
 
 export type ListAgentSandboxFilesError = {
   type: string;
   title: string;
   status: number;
   detail?: string;
+  errors?: {
+    path: string;
+    message: string;
+  }[];
 };
 
 export interface CheckAgentSandboxFileExistsParams {
@@ -1904,38 +2124,67 @@ export type CheckAgentSandboxFileExistsError = {
   title: string;
   status: number;
   detail?: string;
+  errors?: {
+    path: string;
+    message: string;
+  }[];
 };
 
 export interface ListAppDeploymentsParams {
+  /**
+   * Maximum number of items to return (1-100, default 50).
+   * @min 1
+   * @max 100
+   */
+  limit?: number;
+  /** Opaque continuation cursor from a previous response. Send it together with limit. */
+  cursor?: string;
   appId: string;
 }
 
-export type ListAppDeploymentsData = {
-  /** @format date-time */
-  createdAt: string;
-  status:
-    | "UNKNOWN"
-    | "BUILDING"
-    | "ERROR"
-    | "DEPLOYED"
-    | "DEPLOYING"
-    | "SHUTDOWN"
-    | "SHUTTING_DOWN"
-    | "SUSPENDED"
-    | "PENDING";
-  gitCommit?: string;
-  gitCommitMessage?: string;
-  deploymentId: string;
-  buildMethod?: "RAILPACK" | "DOCKERFILE" | "FRAMEWORK";
-  isRollback?: boolean;
-  appId: string;
-}[];
+export interface ListAppDeploymentsData {
+  items: {
+    /** @format date-time */
+    createdAt: string;
+    status:
+      | "UNKNOWN"
+      | "BUILDING"
+      | "ERROR"
+      | "DEPLOYED"
+      | "DEPLOYING"
+      | "SHUTDOWN"
+      | "SHUTTING_DOWN"
+      | "SUSPENDED"
+      | "PENDING";
+    gitCommit?: string;
+    gitCommitMessage?: string;
+    deploymentId: string;
+    buildMethod?: "RAILPACK" | "DOCKERFILE" | "FRAMEWORK";
+    isRollback?: boolean;
+    appId: string;
+  }[];
+  /**
+   * @min -9007199254740991
+   * @max 9007199254740991
+   */
+  total: number;
+  /**
+   * @min -9007199254740991
+   * @max 9007199254740991
+   */
+  limit: number;
+  nextCursor: string | null;
+}
 
 export type ListAppDeploymentsError = {
   type: string;
   title: string;
   status: number;
   detail?: string;
+  errors?: {
+    path: string;
+    message: string;
+  }[];
 };
 
 export interface DeployAppParams {
@@ -1953,6 +2202,10 @@ export type DeployAppError = {
   title: string;
   status: number;
   detail?: string;
+  errors?: {
+    path: string;
+    message: string;
+  }[];
 };
 
 export interface GetAppDeploymentParams {
@@ -1986,6 +2239,10 @@ export type GetAppDeploymentError = {
   title: string;
   status: number;
   detail?: string;
+  errors?: {
+    path: string;
+    message: string;
+  }[];
 };
 
 export interface GetAppDeploymentLogsParams {
@@ -2010,4 +2267,8 @@ export type GetAppDeploymentLogsError = {
   title: string;
   status: number;
   detail?: string;
+  errors?: {
+    path: string;
+    message: string;
+  }[];
 };

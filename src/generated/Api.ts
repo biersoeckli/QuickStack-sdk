@@ -79,6 +79,7 @@ import {
   ListAppsParams,
   ListProjectsData,
   ListProjectsError,
+  ListProjectsParams,
   ReadAgentSandboxFileParams,
   ResumeAgentSandboxByTagData,
   ResumeAgentSandboxByTagError,
@@ -122,7 +123,7 @@ export class QuickStackApi<
   SecurityDataType = unknown,
 > extends HttpClient<SecurityDataType> {
   /**
-   * No description
+   * @description Returns a paginated list of projects. The default limit is 50.
    *
    * @tags Projects
    * @name ListProjects
@@ -130,16 +131,17 @@ export class QuickStackApi<
    * @request GET:/api/v1/projects
    * @secure
    */
-  listProjects = (params: RequestParams = {}) =>
+  listProjects = (query: ListProjectsParams = {}, params: RequestParams = {}) =>
     this.request<ListProjectsData, ListProjectsError>({
       path: `/api/v1/projects`,
       method: "GET",
+      query: query,
       secure: true,
       format: "json",
       ...params,
     });
   /**
-   * No description
+   * @description Creates a project when id is omitted, otherwise updates the existing project. Requires admin.
    *
    * @tags Projects
    * @name SaveProject
@@ -175,7 +177,7 @@ export class QuickStackApi<
       ...params,
     });
   /**
-   * No description
+   * @description Permanently deletes the project, all its Apps and Agents, and the Kubernetes namespace with their workloads and volumes. Requires admin.
    *
    * @tags Projects
    * @name DeleteProject
@@ -192,7 +194,7 @@ export class QuickStackApi<
       ...params,
     });
   /**
-   * No description
+   * @description Returns a paginated list of apps. The default limit is 50.
    *
    * @tags Apps
    * @name ListApps
@@ -210,7 +212,7 @@ export class QuickStackApi<
       ...params,
     });
   /**
-   * @description When an ID is set, the app will be updated. Otherwise a new one will be created.
+   * @description Creates an app when id is omitted, otherwise replaces the existing app. projectId cannot be changed. Call deployApp afterwards to roll out the desired state.
    *
    * @tags Apps
    * @name SaveApp
@@ -246,7 +248,7 @@ export class QuickStackApi<
       ...params,
     });
   /**
-   * No description
+   * @description Returns the current log tail of the app. `lines` defaults to 200 and is limited to 5000.
    *
    * @tags Apps
    * @name GetAppLogs
@@ -267,7 +269,7 @@ export class QuickStackApi<
       ...params,
     });
   /**
-   * @description Run a shell command in the first running Pod of this app. Requires write access to the app.
+   * @description Runs a shell command in the first running Pod of the app. Returns stdout, stderr and exitCode.
    *
    * @tags Apps
    * @name RunAppCommand
@@ -290,7 +292,7 @@ export class QuickStackApi<
       ...params,
     });
   /**
-   * No description
+   * @description Permanently deletes the app and its sub-resources (domains, volumes, file mounts, basic auth).
    *
    * @tags Apps
    * @name DeleteApp
@@ -307,7 +309,7 @@ export class QuickStackApi<
       ...params,
     });
   /**
-   * No description
+   * @description Returns a paginated list of agents. The default limit is 50.
    *
    * @tags Agents
    * @name ListAgents
@@ -325,7 +327,7 @@ export class QuickStackApi<
       ...params,
     });
   /**
-   * @description When an ID is set, the agent will be updated. Otherwise a new one will be created.
+   * @description Creates an agent template when id is omitted, otherwise replaces the existing template. projectId cannot be changed. Call deployAgent afterwards to apply it.
    *
    * @tags Agents
    * @name SaveAgent
@@ -361,7 +363,7 @@ export class QuickStackApi<
       ...params,
     });
   /**
-   * No description
+   * @description Permanently deletes the agent template and its sub-resources (domains, volumes, file mounts, network policy).
    *
    * @tags Agents
    * @name DeleteAgent
@@ -378,7 +380,7 @@ export class QuickStackApi<
       ...params,
     });
   /**
-   * @description Deploys the agent with the given ID. This does not start any agent sandbox, it just applies the configuration to kubernetes (SandboxTemplate). Every new agent sandbox created after this deployment will use the newly applied configuration. This can only be done, wehen no sandbox is running.
+   * @description Deploys the agent configuration to Kubernetes as a SandboxTemplate. Does not start a sandbox. Can only be done when no sandbox is running.
    *
    * @tags Agents
    * @name DeployAgent
@@ -399,7 +401,7 @@ export class QuickStackApi<
       ...params,
     });
   /**
-   * @description List all running agent sandboxes for the given agent ID.
+   * @description Returns a paginated list of running agent sandboxes. The default limit is 50.
    *
    * @tags Agent Sandboxes
    * @name ListAgentSandboxes
@@ -408,18 +410,19 @@ export class QuickStackApi<
    * @secure
    */
   listAgentSandboxes = (
-    { agentId }: ListAgentSandboxesParams,
+    { agentId, ...query }: ListAgentSandboxesParams,
     params: RequestParams = {},
   ) =>
     this.request<ListAgentSandboxesData, ListAgentSandboxesError>({
       path: `/api/v1/agents/${agentId}/sandboxes`,
       method: "GET",
+      query: query,
       secure: true,
       format: "json",
       ...params,
     });
   /**
-   * No description
+   * @description Creates and starts one agent sandbox for this agent. The body is optional and defaults to {}. Changes live Kubernetes resources.
    *
    * @tags Agent Sandboxes
    * @name StartAgentSandbox
@@ -443,7 +446,7 @@ export class QuickStackApi<
       ...params,
     });
   /**
-   * @description Resume the suspended Agent Sandbox of this Agent that carries the given Custom Tag.
+   * @description Resumes the suspended Agent Sandbox of this Agent that carries the given Custom Tag.
    *
    * @tags Agent Sandboxes
    * @name ResumeAgentSandboxByTag
@@ -466,7 +469,7 @@ export class QuickStackApi<
       ...params,
     });
   /**
-   * @description Release the compute of a running Agent Sandbox while keeping its volumes and identity.
+   * @description Releases the compute of a running Agent Sandbox while keeping its volumes and identity. The sandbox Pod is deleted and can be resumed later.
    *
    * @tags Agent Sandboxes
    * @name SuspendAgentSandbox
@@ -486,7 +489,7 @@ export class QuickStackApi<
       ...params,
     });
   /**
-   * @description Recreate the Pod of a suspended Agent Sandbox with its existing volumes mounted.
+   * @description Recreates the Pod of a suspended Agent Sandbox with its existing volumes mounted.
    *
    * @tags Agent Sandboxes
    * @name ResumeAgentSandbox
@@ -526,7 +529,7 @@ export class QuickStackApi<
       ...params,
     });
   /**
-   * No description
+   * @description Permanently deletes the agent sandbox and stops its Pod.
    *
    * @tags Agent Sandboxes
    * @name DeleteAgentSandbox
@@ -546,7 +549,7 @@ export class QuickStackApi<
       ...params,
     });
   /**
-   * @description Get a temporary access URL to access the agent sandbox via the browser. This is only possible if a domain is configured for the agent and the agent serves an API or Web interface.
+   * @description Get a temporary access URL to access the agent sandbox via the browser. This is only possible if a domain is configured for the agent and the agent serves an API or Web interface. No request body; the returned URL expires. Example: GET /api/v1/agents/<agentId>/sandboxes/<sandboxName>/accessUrl/<domainId>.
    *
    * @tags Agent Sandboxes
    * @name GetAgentSandboxAccessUrl
@@ -566,7 +569,7 @@ export class QuickStackApi<
       ...params,
     });
   /**
-   * @description Create a bearer token for direct API access to this Agent Sandbox through a configured domain. The token expires after 15 minutes.
+   * @description Create a bearer token for direct API access to this Agent Sandbox through a configured domain. No request body. The token expires after 15 minutes. Example: POST /api/v1/agents/<agentId>/sandboxes/<sandboxName>/apiToken/<domainId>.
    *
    * @tags Agent Sandboxes
    * @name CreateAgentSandboxApiToken
@@ -589,7 +592,7 @@ export class QuickStackApi<
       ...params,
     });
   /**
-   * @description Delete all stored data of one Custom Tag across the Agent's PER_CUSTOM_TAG volumes. Rejected while a sandbox with that tag exists.
+   * @description Deletes all stored data of one Custom Tag across the Agent's PER_CUSTOM_TAG volumes. Rejected while a sandbox with that tag exists.
    *
    * @tags Agent Sandboxes
    * @name DeleteAgentTag
@@ -609,7 +612,7 @@ export class QuickStackApi<
       ...params,
     });
   /**
-   * @description Run a shell command in a running Agent Sandbox. CLI harness templates stay alive with `sleep infinity`; invoke their documented launcher or bootstrap script here so it receives the Agent Runtime Secret and selected LiteLLM Model Alias.
+   * @description Runs a shell command in a running Agent Sandbox. timeoutSec is 1-3600 (default 120). Returns stdout, stderr and exitCode.
    *
    * @tags Agent Sandboxes
    * @name RunAgentSandboxCommand
@@ -676,7 +679,7 @@ export class QuickStackApi<
       ...params,
     });
   /**
-   * @description List files in an agent sandbox. Requires write access to the agent.
+   * @description Returns a paginated list of files in an agent sandbox. The default limit is 50. Requires write access to the agent.
    *
    * @tags Agent Sandboxes
    * @name ListAgentSandboxFiles
@@ -721,7 +724,7 @@ export class QuickStackApi<
       ...params,
     });
   /**
-   * No description
+   * @description Returns a paginated deployment history. The default limit is 50.
    *
    * @tags Apps
    * @name ListAppDeployments
@@ -730,18 +733,19 @@ export class QuickStackApi<
    * @secure
    */
   listAppDeployments = (
-    { appId }: ListAppDeploymentsParams,
+    { appId, ...query }: ListAppDeploymentsParams,
     params: RequestParams = {},
   ) =>
     this.request<ListAppDeploymentsData, ListAppDeploymentsError>({
       path: `/api/v1/apps/${appId}/deploy`,
       method: "GET",
+      query: query,
       secure: true,
       format: "json",
       ...params,
     });
   /**
-   * No description
+   * @description Starts a build and rollout and returns the deploymentId immediately. Pass forceRebuild=true to rebuild even when the commit/image did not change. This changes live Kubernetes workloads.
    *
    * @tags Apps
    * @name DeployApp
@@ -781,7 +785,7 @@ export class QuickStackApi<
       ...params,
     });
   /**
-   * No description
+   * @description Returns build/deploy logs for one deployment. tailLines is limited to 5000.
    *
    * @tags Apps
    * @name GetAppDeploymentLogs

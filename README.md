@@ -30,7 +30,7 @@ import { QuickStackClient } from "@quickstackdev/sdk";
 const client = QuickStackClient.create();
 
 const apps = await client.listApps({ projectId: "project-id" });
-console.log(apps);
+console.log("Apps in project:", apps.items.length);
 ```
 
 ## Authentication and Client Setup
@@ -50,6 +50,31 @@ Or use environment variables:
 
 ```ts
 const client = QuickStackClient.create();
+```
+
+## List Operations and Pagination
+
+The SDK provides these list operations:
+
+- `listProjects({ limit?, cursor? })`
+- `listApps({ projectId?, limit?, cursor? })`
+- `listAgents({ projectId?, limit?, cursor? })`
+- `listAppDeployments({ appId, limit?, cursor? })`
+
+Each method returns a paginated object, not an array. The `items` property contains the returned records; `total` is the total number of matching records, `limit` is the page size, and `nextCursor` is the cursor for the next page or `null` when there are no more pages. The default limit is 50 and the maximum is 100.
+
+```ts
+const firstPage = await client.listApps({ projectId: "project-id", limit: 25 });
+console.log("Apps on this page:", firstPage.items.length, "of", firstPage.total);
+
+if (firstPage.nextCursor) {
+  const nextPage = await client.listApps({
+    projectId: "project-id",
+    limit: firstPage.limit,
+    cursor: firstPage.nextCursor,
+  });
+  console.log("Next page:", nextPage.items);
+}
 ```
 
 ## Apps CRUD
@@ -107,7 +132,7 @@ console.log(app.name);
 
 ```ts
 const apps = await client.listApps({ projectId: "project-id" });
-console.log("Apps in project:", apps.length);
+console.log("Apps in project:", apps.items.length, "of", apps.total);
 ```
 
 ### Update App
@@ -181,7 +206,7 @@ console.log("Exit code:", result.exitCode);
 ```ts
 try {
   const apps = await client.listApps({ projectId: "project-id" });
-  console.log(apps);
+  console.log(apps.items);
 } catch (error) {
   console.error("QuickStack API call failed", error);
 }
