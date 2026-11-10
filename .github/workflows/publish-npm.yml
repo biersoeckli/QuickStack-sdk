@@ -39,11 +39,15 @@ jobs:
         run: bun install --frozen-lockfile
 
       - name: Set package version from release tag
+        id: package
+        env:
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+          IS_PRERELEASE: ${{ github.event.release.prerelease }}
         run: |
           PACKAGE_VERSION=""
 
           if [[ "${GITHUB_EVENT_NAME}" == "release" ]]; then
-            PACKAGE_VERSION="${{ github.event.release.tag_name }}"
+            PACKAGE_VERSION="${RELEASE_TAG}"
           elif [[ "${GITHUB_REF}" == refs/tags/* ]]; then
             PACKAGE_VERSION="${GITHUB_REF_NAME}"
           fi
@@ -57,6 +61,17 @@ jobs:
 
           npm version "${PACKAGE_VERSION}" --no-git-tag-version --allow-same-version
 
+          # A prerelease version must never move npm's latest dist-tag, including
+          # when this workflow is started manually from a tag.
+          if [[ "${PACKAGE_VERSION%%+*}" == *-* ]]; then
+            echo "dist_tag=preview" >> "$GITHUB_OUTPUT"
+          elif [[ "${IS_PRERELEASE}" == "true" ]]; then
+            echo "A GitHub prerelease must use a prerelease version, for example 1.1.0-preview1."
+            exit 1
+          else
+            echo "dist_tag=latest" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Run tests
         run: bun test
 
@@ -64,4 +79,4 @@ jobs:
         run: bun run build
 
       - name: Publish to npmjs
-        run: npm publish --provenance --access public
+        run: npm publish --provenance --access public --tag "${{ steps.package.outputs.dist_tag }}"
